@@ -271,7 +271,7 @@ function lnFind(m, id) {
 function lnStars(c) {
   const tot = c && +c.total;
   if (!tot) return 3;
-  const b = c.best != null ? +c.best : +c.score, r = Math.max(0, Math.min(1, (b || 0) / tot));
+  const r = Math.max(0, Math.min(1, c.best != null ? +c.best || 0 : (+c.score || 0) / tot));   // best is already a 0-1 ratio
   return r >= 1 ? 3 : r >= 0.67 ? 2 : 1;
 }
 const lnStarsHtml = (n, cls) => [1, 2, 3].map((k) => `<span class="${k <= n ? "on" : "off"} ln-fill">${lnIc("star")}</span>`).join("").replace(/^/, cls || "");

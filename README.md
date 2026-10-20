@@ -8,7 +8,7 @@ Built for the **2026 FinTechathon International Track, Topic A (Personal Finance
 
 > All data in the demo is synthetic. Learning content is educational only and is not investment advice.
 
-**Contents:** [Why](#why-county) · [What it does](#what-it-does) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Security](#security-and-privacy) · [Tests and evidence](#tests-and-evidence) · [Real vs simulated](#what-is-real-and-what-is-simulated) · [Project layout](#project-layout) · [API](#api-overview) · [Roadmap](#roadmap) · [Docs](#documentation)
+**Contents:** [Why](#why-county) · [What it does](#what-it-does) · [Screenshots](#screenshots) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Security](#security-and-privacy) · [Tests and evidence](#tests-and-evidence) · [Real vs simulated](#what-is-real-and-what-is-simulated) · [Project layout](#project-layout) · [API](#api-overview) · [Roadmap](#roadmap) · [Docs](#documentation)
 
 ---
 
@@ -35,6 +35,20 @@ County's approach:
 | **Ask AI** | A planner that turns your real numbers into a short plan with a new finish date ("cut this 20%, reach the goal N days sooner"). Deterministic today; an LLM can be attached later to phrase it. |
 | **Invest** | A Duolingo-style learning path (4 levels, 12 lessons, 36 quiz questions, XP, streak, daily goal, level-up), per-level playbooks, updatable lesson packs (simulated updates), a live news feed from public RSS sources and a curated research reading list. |
 | **Trust** | Accounts, guest read-only role, consent gate, privacy screen, data export and delete, access log, accuracy report, Settings. |
+
+## Screenshots
+
+Synthetic demo persona, light theme, 375 px wide.
+
+| Home | Ask AI | Goals | History |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/01-home.jpg" width="190"> | <img src="docs/screenshots/02-ask-ai.jpg" width="190"> | <img src="docs/screenshots/03-goals.jpg" width="190"> | <img src="docs/screenshots/04-history.jpg" width="190"> |
+| "You can spend today", payday calendar, goals | A plan built from real numbers | Progress and status per goal | Search, filters and the date wheel |
+
+| Invest path | Lesson quiz | Privacy and data |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/05-invest-path.jpg" width="190"> | <img src="docs/screenshots/06-lesson-quiz.jpg" width="190"> | <img src="docs/screenshots/07-privacy.jpg" width="190"> |
+| Duolingo-style levels, stars, streak, XP | Instant feedback with the reason | Consent, export, delete, access log |
 
 ## Quick start
 
