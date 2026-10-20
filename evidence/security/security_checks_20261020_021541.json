@@ -1,0 +1,2795 @@
+{
+  "tool": "tools/security_checks.py",
+  "scope": "self-assessment of the local backend; not a penetration test or certification",
+  "started_utc": "2026-10-19T20:15:06+00:00",
+  "finished_utc": "2026-10-19T20:15:41+00:00",
+  "python": "3.12.10",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "server": "in-process ThreadingHTTPServer on 127.0.0.1 random port, throw-away SQLite DB",
+  "totals": {
+    "checks": 347,
+    "pass": 325,
+    "fail": 0,
+    "note": 22
+  },
+  "checks": [
+    {
+      "id": "SETUP-01",
+      "name": "Fresh install: status is public and reports 'not configured'; no default account exists",
+      "request": "GET /api/auth/status (no cookie)",
+      "expected": "200 configured=false authenticated=false; users table empty",
+      "actual": "200 {'configured': False, 'authenticated': False, 'username': None, 'role': None, 'stepup_until': None, 'consent': None, 'idle_timeout_s': 1800} users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-02",
+      "name": "Before the owner exists, data endpoints are still 401 (no open first-run window for data)",
+      "request": "GET /api/state (no cookie, no users)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-03a",
+      "name": "Password policy on setup: short rejected",
+      "request": "POST /api/auth/setup password=short",
+      "expected": "400 password_too_short, no user created",
+      "actual": "400 password_too_short users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-03b",
+      "name": "Password policy on setup: one char rejected",
+      "request": "POST /api/auth/setup password=one char",
+      "expected": "400 password_one_character, no user created",
+      "actual": "400 password_one_character users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-03c",
+      "name": "Password policy on setup: equals username rejected",
+      "request": "POST /api/auth/setup password=equals username",
+      "expected": "400 password_equals_username, no user created",
+      "actual": "400 password_equals_username users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-03d",
+      "name": "Password policy on setup: too long rejected",
+      "request": "POST /api/auth/setup password=too long",
+      "expected": "400 password_too_long, no user created",
+      "actual": "400 password_too_long users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-04a",
+      "name": "Setup with invalid username / non-string input -> 400, no user, no crash",
+      "request": "POST /api/auth/setup {\"username\": \"a b\", \"password\": \"Owner-Selftest-Pass-91\"}",
+      "expected": "400",
+      "actual": "400 username_invalid users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-04b",
+      "name": "Setup with invalid username / non-string input -> 400, no user, no crash",
+      "request": "POST /api/auth/setup {\"username\": \"ab\", \"password\": \"Owner-Selftest-Pass-91\"}",
+      "expected": "400",
+      "actual": "400 username_invalid users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-04c",
+      "name": "Setup with invalid username / non-string input -> 400, no user, no crash",
+      "request": "POST /api/auth/setup {\"username\": [\"x\"], \"password\": 12345678}",
+      "expected": "400",
+      "actual": "400 username_invalid users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-04d",
+      "name": "Setup with invalid username / non-string input -> 400, no user, no crash",
+      "request": "POST /api/auth/setup {\"username\": \"ok_name\", \"password\": 12345678}",
+      "expected": "400",
+      "actual": "400 password_invalid users=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-05",
+      "name": "First-run setup creates the single owner and signs in",
+      "request": "POST /api/auth/setup",
+      "expected": "200 role=owner, session cookie issued",
+      "actual": "200 {'ok': True, 'username': 'selftest_owner', 'role': 'owner', 'stepup_until': None} users=1",
+      "result": "PASS"
+    },
+    {
+      "id": "COOKIE-01",
+      "name": "Session cookie flags: HttpOnly, SameSite=Strict, Path=/, Max-Age = 12 h absolute lifetime (Secure only under TLS, see TLS-03)",
+      "request": "Set-Cookie of POST /api/auth/setup",
+      "expected": "HttpOnly; SameSite=Strict; Path=/; Max-Age=43200; no Secure on plain HTTP",
+      "actual": "fc_session=<token>; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200",
+      "result": "PASS"
+    },
+    {
+      "id": "COOKIE-02",
+      "name": "Session token: >= 256 bits of randomness, never echoed in a JSON body",
+      "request": "inspect the cookie value + reply body",
+      "expected": "token length >= 43 chars (token_urlsafe(32)); not in body",
+      "actual": "len=43 in_body=False",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-06",
+      "name": "Setup works only once (a second owner cannot be created, even by the logged-in owner)",
+      "request": "POST /api/auth/setup again",
+      "expected": "409 already_configured, still 1 user",
+      "actual": "409 already_configured users=1",
+      "result": "PASS"
+    },
+    {
+      "id": "SETUP-07",
+      "name": "Status for the signed-in owner: role, no step-up yet, idle timeout 1800 s, consent not given",
+      "request": "GET /api/auth/status (owner cookie)",
+      "expected": "authenticated, role=owner, stepup_until=null, idle_timeout_s=1800, consent=null",
+      "actual": "{'configured': True, 'authenticated': True, 'username': 'selftest_owner', 'role': 'owner', 'stepup_until': None, 'consent': None, 'idle_timeout_s': 1800}",
+      "result": "PASS"
+    },
+    {
+      "id": "COOKIE-03",
+      "name": "Garbage / forged cookie -> 401 and the browser is told to drop it",
+      "request": "GET /api/state Cookie: fc_session=garbage",
+      "expected": "401 + Set-Cookie Max-Age=0",
+      "actual": "401 set-cookie=['fc_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0']",
+      "result": "PASS"
+    },
+    {
+      "id": "COOKIE-04",
+      "name": "A valid token in a URL parameter or header is NOT a session (cookie only)",
+      "request": "GET /api/state?fc_session=<token> + X-Session/Authorization headers",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "COOKIE-05",
+      "name": "Logout deletes the server-side session; replaying the old cookie fails",
+      "request": "login, POST /api/auth/logout, replay cookie",
+      "expected": "logout 200 + cookie cleared; replay 401",
+      "actual": "logout=200 cleared=True replay=401",
+      "result": "PASS"
+    },
+    {
+      "id": "COOKIE-06",
+      "name": "Login rotates the token (anti session-fixation): the presented old token is invalidated",
+      "request": "login with an existing cookie A -> new cookie B",
+      "expected": "B != A; A -> 401; B -> 200",
+      "actual": "same=False old=401 new=200",
+      "result": "PASS"
+    },
+    {
+      "id": "POL-01",
+      "name": "Every route implemented in server._route / ext_routes has an entry in the central POLICY table (no route can bypass the gate)",
+      "request": "compare literal route paths in Handler._route + ext_routes.GET/POST with POLICY",
+      "expected": "no routes missing from POLICY",
+      "actual": "policy entries=36 implemented paths=36 missing=[]",
+      "result": "PASS"
+    },
+    {
+      "id": "POL-02",
+      "name": "Policy table inventory (informational)",
+      "request": "server.POLICY",
+      "expected": "informational",
+      "actual": "{'OWNER': 2, 'PUBLIC': 3, 'READ': 9, 'SENSITIVE': 5, 'SESSION': 2, 'WRITE': 15}",
+      "result": "NOTE"
+    },
+    {
+      "id": "POL-03",
+      "name": "Consent-gated endpoints are all POST routes of the WRITE/SENSITIVE tiers",
+      "request": "server.CONSENT_GATED vs POLICY",
+      "expected": "each gated path is a POST WRITE or SENSITIVE entry",
+      "actual": "['/api/chat', '/api/demo', '/api/import', '/api/scan']",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-01",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "POST /api/ask (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-02",
+      "name": "Unauthenticated request to non-public route is rejected (OWNER)",
+      "request": "GET /api/audit (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-03",
+      "name": "Unauthenticated request to non-public route is rejected (SESSION)",
+      "request": "POST /api/auth/logout (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-04",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/auth/password (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-05",
+      "name": "Unauthenticated request to non-public route is rejected (SESSION)",
+      "request": "POST /api/auth/stepup (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-06",
+      "name": "Unauthenticated request to non-public route is rejected (OWNER)",
+      "request": "GET /api/auth/users (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-07",
+      "name": "Unauthenticated request to non-public route is rejected (SENSITIVE)",
+      "request": "POST /api/auth/users/delete (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-08",
+      "name": "Unauthenticated request to non-public route is rejected (SENSITIVE)",
+      "request": "POST /api/auth/viewer (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-09",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/benchmark (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-10",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/chat (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-11",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/confirm (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-12",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/consent (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-13",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/consent/withdraw (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-14",
+      "name": "Unauthenticated request to non-public route is rejected (SENSITIVE)",
+      "request": "POST /api/delete-all (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-15",
+      "name": "Unauthenticated request to non-public route is rejected (SENSITIVE)",
+      "request": "POST /api/demo (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-16",
+      "name": "Unauthenticated request to non-public route is rejected (SENSITIVE)",
+      "request": "GET /api/export (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-17",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/goal (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-18",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/goal/delete (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-19",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/goal/deposit (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-20",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/import (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-21",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/insights (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-22",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/lessons (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-23",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/lessons/reset (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-24",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/lessons/update (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-25",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/news (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-26",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/news/refresh (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-27",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/profile (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-28",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/report (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-29",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/research (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-30",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/resolve (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-31",
+      "name": "Unauthenticated request to non-public route is rejected (WRITE)",
+      "request": "POST /api/scan (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-32",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/state (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-33",
+      "name": "Unauthenticated request to non-public route is rejected (READ)",
+      "request": "GET /api/transactions (no cookie)",
+      "expected": "401 unauthenticated",
+      "actual": "401 unauthenticated",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-34",
+      "name": "Unknown /api path without a session -> 401 (default tier is the strictest)",
+      "request": "GET /api/zzz-unknown (no cookie)",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-35",
+      "name": "Unknown /api path without a session -> 401 (default tier is the strictest)",
+      "request": "POST /api/zzz-unknown (no cookie)",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "AUTHN-PUB",
+      "name": "The three PUBLIC API routes are reachable without a session (and nothing else is)",
+      "request": "GET status / POST login / POST setup (no cookie)",
+      "expected": "status 200; login 401 (bad credentials, not 'unauthenticated'); setup 409 (already configured)",
+      "actual": "200 / 401 invalid_credentials / 409 already_configured",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-01",
+      "name": "SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothing executed",
+      "request": "GET /api/export (owner session, no step-up)",
+      "expected": "403 stepup_required",
+      "actual": "403 stepup_required",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-02",
+      "name": "SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothing executed",
+      "request": "POST /api/auth/users/delete (owner session, no step-up)",
+      "expected": "403 stepup_required",
+      "actual": "403 stepup_required",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-03",
+      "name": "SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothing executed",
+      "request": "POST /api/auth/viewer (owner session, no step-up)",
+      "expected": "403 stepup_required",
+      "actual": "403 stepup_required",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-04",
+      "name": "SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothing executed",
+      "request": "POST /api/delete-all (owner session, no step-up)",
+      "expected": "403 stepup_required",
+      "actual": "403 stepup_required",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-05",
+      "name": "SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothing executed",
+      "request": "POST /api/demo (owner session, no step-up)",
+      "expected": "403 stepup_required",
+      "actual": "403 stepup_required",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-90",
+      "name": "Nothing changed by the refused SENSITIVE calls",
+      "request": "users and transaction counts before/after",
+      "expected": "unchanged",
+      "actual": "before=(1, 0) after=(1, 0)",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-91",
+      "name": "Step-up with a wrong password is refused and opens no window",
+      "request": "POST /api/auth/stepup wrong password",
+      "expected": "403 invalid_password, stepup_until=null",
+      "actual": "403 invalid_password stepup_until=None",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-92",
+      "name": "Correct password opens a 5-minute step-up window and rotates the session token",
+      "request": "POST /api/auth/stepup correct password",
+      "expected": "200 stepup_until = now+300 (+-10 s); new cookie != old",
+      "actual": "200 until-now=300s rotated=True",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-93",
+      "name": "The pre-step-up token is dead after rotation",
+      "request": "GET /api/auth/status with the old cookie",
+      "expected": "authenticated=false",
+      "actual": "False",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-94",
+      "name": "Step-up does not extend the absolute session lifetime (created_at carried over)",
+      "request": "sessions.created_at before/after step-up",
+      "expected": "equal",
+      "actual": "before=1792440906.3896744 after=1792440906.3896744",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-95",
+      "name": "With a fresh step-up the SENSITIVE route is reachable",
+      "request": "GET /api/export after step-up",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-96",
+      "name": "Step-up expires after 300 s (clock offset: 299 s still valid, 301 s refused)",
+      "request": "GET /api/export at t+299 s and t+301 s (auth.now offset)",
+      "expected": "200, then 403 stepup_required",
+      "actual": "200, 403 stepup_required",
+      "result": "PASS"
+    },
+    {
+      "id": "STEP-97",
+      "name": "Constants as documented: STEPUP_TTL=300, IDLE_TIMEOUT=1800, ABS_LIFETIME=43200",
+      "request": "auth module constants",
+      "expected": "300 / 1800 / 43200",
+      "actual": "300 / 1800 / 43200",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-01",
+      "name": "Ingestion without recorded consent -> 428 consent_required (server-side gate)",
+      "request": "POST /api/chat (owner, step-up, no consent)",
+      "expected": "428 consent_required",
+      "actual": "428 consent_required",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-02",
+      "name": "Ingestion without recorded consent -> 428 consent_required (server-side gate)",
+      "request": "POST /api/import (owner, step-up, no consent)",
+      "expected": "428 consent_required",
+      "actual": "428 consent_required",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-03",
+      "name": "Ingestion without recorded consent -> 428 consent_required (server-side gate)",
+      "request": "POST /api/scan (owner, step-up, no consent)",
+      "expected": "428 consent_required",
+      "actual": "428 consent_required",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-04",
+      "name": "Ingestion without recorded consent -> 428 consent_required (server-side gate)",
+      "request": "POST /api/demo (owner, step-up, no consent)",
+      "expected": "428 consent_required",
+      "actual": "428 consent_required",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-05",
+      "name": "Refused ingestion stored nothing",
+      "request": "transaction count",
+      "expected": "unchanged",
+      "actual": "0 -> 0",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-06",
+      "name": "Reads do not need consent",
+      "request": "GET /api/state (no consent)",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-07",
+      "name": "Consent needs agree === true (boolean) and a version",
+      "request": "POST /api/consent with agree=false / 'true' / no version",
+      "expected": "400, 400, 400",
+      "actual": "400 agree_required, 400 agree_required, 400 version_required",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-08",
+      "name": "Consent recorded with version and UTC timestamp; status endpoint reports it",
+      "request": "POST /api/consent {agree:true, version:'v1'}",
+      "expected": "200; consent row (v1, ISO time)",
+      "actual": "200 row=[('v1', '2026-10-19T20:15:08Z')] status.consent={'version': 'v1', 'at': '2026-10-19T20:15:08Z'}",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-09",
+      "name": "After consent the same ingestion call succeeds",
+      "request": "POST /api/chat",
+      "expected": "200",
+      "actual": "200 kind=digest",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-10",
+      "name": "Withdrawing consent re-closes the gate immediately",
+      "request": "POST /api/consent/withdraw then POST /api/chat",
+      "expected": "200, then 428",
+      "actual": "200, 428 consent_required",
+      "result": "PASS"
+    },
+    {
+      "id": "CONS-11",
+      "name": "Residual: the consent record is ONE global row per installation (not per user); the first-run owner's consent covers every account",
+      "request": "static review db.py consent table",
+      "expected": "informational",
+      "actual": "consent(id CHECK(id=1), version, at)",
+      "result": "NOTE"
+    },
+    {
+      "id": "PT-00",
+      "name": "Control: index served",
+      "request": "GET /",
+      "expected": "200 text/html",
+      "actual": "200 text/html; charset=utf-8",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-00b",
+      "name": "Control: frontend asset served",
+      "request": "GET /app.js",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-01",
+      "name": "Static path traversal blocked",
+      "request": "GET /../backend/server.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-02",
+      "name": "Static path traversal blocked",
+      "request": "GET /%2e%2e/backend/server.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-03",
+      "name": "Static path traversal blocked",
+      "request": "GET /..%2fbackend%2fserver.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-04",
+      "name": "Static path traversal blocked",
+      "request": "GET /..\\backend\\server.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-05",
+      "name": "Static path traversal blocked",
+      "request": "GET /%5c..%5cbackend%5cserver.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-06",
+      "name": "Static path traversal blocked",
+      "request": "GET /C:/Windows/win.ini",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-07",
+      "name": "Static path traversal blocked",
+      "request": "GET /C:\\Windows\\win.ini",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-08",
+      "name": "Static path traversal blocked",
+      "request": "GET //C:/Windows/win.ini",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-09",
+      "name": "Static path traversal blocked",
+      "request": "GET /frontend/../data/app.db",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-10",
+      "name": "Static path traversal blocked",
+      "request": "GET /....//....//backend/server.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-11",
+      "name": "Static path traversal blocked",
+      "request": "GET /%2e%2e%5c%2e%2e%5cdata%5capp.db",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-12",
+      "name": "Static path traversal blocked",
+      "request": "GET /data/app.db",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-13",
+      "name": "Static path traversal blocked",
+      "request": "GET /backend/server.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-14",
+      "name": "Static path traversal blocked",
+      "request": "GET /app.js/../../backend/db.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-15",
+      "name": "Static path traversal blocked",
+      "request": "GET /%252e%252e/backend/server.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-16",
+      "name": "Static path traversal blocked",
+      "request": "GET /..;/backend/server.py",
+      "expected": "4xx and no source/DB/OS file content",
+      "actual": "404 leaked=False ",
+      "result": "PASS"
+    },
+    {
+      "id": "PT-17",
+      "name": "Unknown API route returns JSON 404 (owner with step-up)",
+      "request": "GET /api/does-not-exist",
+      "expected": "404 application/json",
+      "actual": "404 application/json; charset=utf-8",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-01",
+      "name": "Security headers present, no CORS header",
+      "request": "GET /",
+      "expected": "nosniff, X-Frame-Options DENY, Referrer-Policy no-referrer, CSP default-src 'self' + frame-ancestors 'none', no ACAO",
+      "actual": "status=200 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security-policy=default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-02",
+      "name": "Security headers present, no CORS header",
+      "request": "GET /app.js",
+      "expected": "nosniff, X-Frame-Options DENY, Referrer-Policy no-referrer, CSP default-src 'self' + frame-ancestors 'none', no ACAO",
+      "actual": "status=200 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security-policy=default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-03",
+      "name": "Security headers present, no CORS header",
+      "request": "GET /api/state",
+      "expected": "nosniff, X-Frame-Options DENY, Referrer-Policy no-referrer, CSP default-src 'self' + frame-ancestors 'none', no ACAO",
+      "actual": "status=200 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security-policy=default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-04",
+      "name": "Security headers present, no CORS header",
+      "request": "GET /nope.txt",
+      "expected": "nosniff, X-Frame-Options DENY, Referrer-Policy no-referrer, CSP default-src 'self' + frame-ancestors 'none', no ACAO",
+      "actual": "status=404 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security-policy=default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-05",
+      "name": "API responses are not cacheable",
+      "request": "GET /api/state",
+      "expected": "Cache-Control: no-store",
+      "actual": "no-store",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-06",
+      "name": "index.html has no inline script or inline event handlers (CSP-compatible)",
+      "request": "GET /",
+      "expected": "0 inline <script>, 0 on*= attributes",
+      "actual": "inline=0 on-attrs=0",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-07",
+      "name": "Residual: CSP allows style-src 'unsafe-inline'; no HSTS on the default plain-HTTP mode",
+      "request": "GET /",
+      "expected": "informational",
+      "actual": "style-src unsafe-inline=True; strict-transport-security absent=True",
+      "result": "NOTE"
+    },
+    {
+      "id": "HDR-08",
+      "name": "Permissions-Policy limits camera/microphone to self and disables geolocation",
+      "request": "GET /",
+      "expected": "camera=(self), microphone=(self), geolocation=()",
+      "actual": "status=200 permissions-policy=camera=(self), microphone=(self), geolocation=()",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-09",
+      "name": "Permissions-Policy limits camera/microphone to self and disables geolocation",
+      "request": "GET /api/state",
+      "expected": "camera=(self), microphone=(self), geolocation=()",
+      "actual": "status=200 permissions-policy=camera=(self), microphone=(self), geolocation=()",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-10",
+      "name": "Permissions-Policy limits camera/microphone to self and disables geolocation (also on a 401)",
+      "request": "GET /api/state (no cookie)",
+      "expected": "camera=(self), microphone=(self), geolocation=()",
+      "actual": "status=401 permissions-policy=camera=(self), microphone=(self), geolocation=()",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-11",
+      "name": "Cache-Control: no-store on API replies (data, 401 and auth replies)",
+      "request": "GET /api/state",
+      "expected": "no-store",
+      "actual": "status=200 cache-control=no-store",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-12",
+      "name": "Cache-Control: no-store on API replies (data, 401 and auth replies)",
+      "request": "GET /api/state (no cookie)",
+      "expected": "no-store",
+      "actual": "status=401 cache-control=no-store",
+      "result": "PASS"
+    },
+    {
+      "id": "HDR-13",
+      "name": "Cache-Control: no-store on API replies (data, 401 and auth replies)",
+      "request": "POST /api/auth/login (no cookie)",
+      "expected": "no-store",
+      "actual": "status=401 cache-control=no-store",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-01",
+      "name": "POST without application/json is rejected",
+      "request": "POST /api/chat Content-Type=None",
+      "expected": "415",
+      "actual": "415",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-02",
+      "name": "POST without application/json is rejected",
+      "request": "POST /api/chat Content-Type=text/plain",
+      "expected": "415",
+      "actual": "415",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-03",
+      "name": "POST without application/json is rejected",
+      "request": "POST /api/chat Content-Type=application/x-www-form-urlencoded",
+      "expected": "415",
+      "actual": "415",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-04",
+      "name": "POST without application/json is rejected",
+      "request": "POST /api/chat Content-Type=multipart/form-data; boundary=x",
+      "expected": "415",
+      "actual": "415",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-05",
+      "name": "Cross-site-style simple POST cannot trigger delete-all",
+      "request": "POST /api/delete-all Content-Type=text/plain",
+      "expected": "415 and data unchanged",
+      "actual": "415 tx before=371 after=371",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-06",
+      "name": "application/json with charset accepted",
+      "request": "POST /api/chat",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-07",
+      "name": "OPTIONS not implemented (no CORS preflight success)",
+      "request": "OPTIONS /api/delete-all",
+      "expected": "501 and no Access-Control-Allow-*",
+      "actual": "501 acao=False",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-08",
+      "name": "PUT not implemented (no CORS preflight success)",
+      "request": "PUT /api/delete-all",
+      "expected": "501 and no Access-Control-Allow-*",
+      "actual": "501 acao=False",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-09",
+      "name": "DELETE not implemented (no CORS preflight success)",
+      "request": "DELETE /api/delete-all",
+      "expected": "501 and no Access-Control-Allow-*",
+      "actual": "501 acao=False",
+      "result": "PASS"
+    },
+    {
+      "id": "CT-10",
+      "name": "Known quirk: content-type check is a prefix match (e.g. application/jsonp passes)",
+      "request": "static review of server.py do_POST",
+      "expected": "informational",
+      "actual": "startswith('application/json')",
+      "result": "NOTE"
+    },
+    {
+      "id": "HOST-01-Ga",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET /api/state Host: 'evil.example'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-01-Gs",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET / Host: 'evil.example'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-01-Pa",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "POST /api/chat Host: 'evil.example'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-02-Ga",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET /api/state Host: 'evil.example:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-02-Gs",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET / Host: 'evil.example:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-02-Pa",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "POST /api/chat Host: 'evil.example:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-03-Ga",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET /api/state Host: 'localhost.evil.com'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-03-Gs",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET / Host: 'localhost.evil.com'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-03-Pa",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "POST /api/chat Host: 'localhost.evil.com'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-04-Ga",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET /api/state Host: '127.0.0.1.evil.com'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-04-Gs",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET / Host: '127.0.0.1.evil.com'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-04-Pa",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "POST /api/chat Host: '127.0.0.1.evil.com'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-05-Ga",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET /api/state Host: '192.168.1.5:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-05-Gs",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET / Host: '192.168.1.5:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-05-Pa",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "POST /api/chat Host: '192.168.1.5:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-06-Ga",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET /api/state Host: ''",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-06-Gs",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET / Host: ''",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-06-Pa",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "POST /api/chat Host: ''",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-07-Ga",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET /api/state Host: '0.0.0.0:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-07-Gs",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "GET / Host: '0.0.0.0:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-07-Pa",
+      "name": "Wrong Host header rejected (DNS-rebinding guard)",
+      "request": "POST /api/chat Host: '0.0.0.0:8000'",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-OK1",
+      "name": "Allowed Host headers accepted",
+      "request": "GET /api/state Host: localhost:60643",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-OK2",
+      "name": "Allowed Host headers accepted",
+      "request": "GET /api/state Host: 127.0.0.1:60643",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-OK3",
+      "name": "Allowed Host headers accepted",
+      "request": "GET /api/state Host: [::1]:60643",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "HOST-OK4",
+      "name": "Allowed Host headers accepted",
+      "request": "GET /api/state Host: localhost",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-01",
+      "name": "Malformed Content-Length handled without crash",
+      "request": "Content-Length: abc",
+      "expected": "response < 500, server stays up",
+      "actual": "200  alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-02",
+      "name": "Malformed Content-Length handled without crash",
+      "request": "Content-Length: -1",
+      "expected": "response < 500, server stays up",
+      "actual": "200  alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-03",
+      "name": "Malformed Content-Length handled without crash",
+      "request": "Content-Length: 99999999999 (no body)",
+      "expected": "response < 500, server stays up",
+      "actual": "413  alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-04",
+      "name": "Malformed Content-Length handled without crash",
+      "request": "Content-Length: 9000001 (over 9 MB cap, no body)",
+      "expected": "response < 500, server stays up",
+      "actual": "413  alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-05",
+      "name": "Malformed Content-Length handled without crash",
+      "request": "Content-Length: 0",
+      "expected": "response < 500, server stays up",
+      "actual": "200  alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-06",
+      "name": "Malformed Content-Length handled without crash",
+      "request": "no Content-Length header",
+      "expected": "response < 500, server stays up",
+      "actual": "200  alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-07",
+      "name": "Non-object / invalid JSON body handled",
+      "request": "POST /api/chat body=b'[1,2,3]'",
+      "expected": "response < 500, server stays up",
+      "actual": "400  body={\"error\": \"invalid_json\"}",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-08",
+      "name": "Non-object / invalid JSON body handled",
+      "request": "POST /api/chat body=b'null'",
+      "expected": "response < 500, server stays up",
+      "actual": "400  body={\"error\": \"invalid_json\"}",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-09",
+      "name": "Non-object / invalid JSON body handled",
+      "request": "POST /api/chat body=b'\"string\"'",
+      "expected": "response < 500, server stays up",
+      "actual": "400  body={\"error\": \"invalid_json\"}",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-10",
+      "name": "Non-object / invalid JSON body handled",
+      "request": "POST /api/chat body=b'123'",
+      "expected": "response < 500, server stays up",
+      "actual": "400  body={\"error\": \"invalid_json\"}",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-11",
+      "name": "Non-object / invalid JSON body handled",
+      "request": "POST /api/chat body=b'{not json'",
+      "expected": "response < 500, server stays up",
+      "actual": "400  body={\"error\": \"invalid_json\"}",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-12",
+      "name": "Non-object / invalid JSON body handled",
+      "request": "POST /api/chat body=b'\\xff\\xfe\\x00bad-utf8'",
+      "expected": "response < 500, server stays up",
+      "actual": "400  body={\"error\": \"invalid_json\"}",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-13",
+      "name": "Array body on a route that needs fields -> 400",
+      "request": "POST /api/confirm body=[]",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-14",
+      "name": "FIXED (was FAIL): deeply nested JSON array -> clean 400",
+      "request": "POST /api/chat 200k-deep array",
+      "expected": "400 invalid_json, server stays up",
+      "actual": "400  {\"error\": \"invalid_json\"} alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-14b",
+      "name": "FIXED: deeply nested JSON object (parser RecursionError) -> clean 400",
+      "request": "POST /api/chat 100k-deep object",
+      "expected": "400 invalid_json, server stays up",
+      "actual": "400  {\"error\": \"invalid_json\"} alive_after=True",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-15",
+      "name": "Integer beyond SQLite range -> 400",
+      "request": "POST /api/confirm id=10**30",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-16",
+      "name": "Non-numeric id -> 400",
+      "request": "POST /api/confirm id='1 OR 1=1'",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "BODY-17",
+      "name": "Category outside whitelist (existing transaction id) -> 400",
+      "request": "POST /api/confirm category=not_a_category",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-01",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='1e999'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-02",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='NaN'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-03",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='Infinity'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-04",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='-5'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-05",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='0'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-06",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='999999999999999999999999999999'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-07",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='1e999999999'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-08",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='1e-999999999'",
+      "expected": "200 with imported=0 (skipped) or 4xx; never a dropped connection",
+      "actual": "200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-09",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='12.345'",
+      "expected": "imported=1",
+      "actual": "200  report={'read': 1, 'imported': 1, 'duplicates': 0, 'skipped': 0, 'silent': 0, 'digest': 1, 'ask': 0} rows_added=1",
+      "result": "PASS"
+    },
+    {
+      "id": "NUM-10",
+      "name": "CSV import amount edge case",
+      "request": "POST /api/import amount='¥1,234.50'",
+      "expected": "imported=1",
+      "actual": "200  report={'read': 1, 'imported': 1, 'duplicates': 0, 'skipped': 0, 'silent': 0, 'digest': 1, 'ask': 0} rows_added=1",
+      "result": "PASS"
+    },
+    {
+      "id": "CHAT-01",
+      "name": "Chat amount edge case",
+      "request": "POST /api/chat text='coffee 99999999999'...",
+      "expected": "unknown",
+      "actual": "200 kind=unknown",
+      "result": "PASS"
+    },
+    {
+      "id": "CHAT-02",
+      "name": "Chat amount edge case",
+      "request": "POST /api/chat text='coffee 99999999999999999999999'...",
+      "expected": "unknown",
+      "actual": "200 kind=unknown",
+      "result": "PASS"
+    },
+    {
+      "id": "CHAT-03",
+      "name": "Chat amount edge case",
+      "request": "POST /api/chat text='coffee NaN'...",
+      "expected": "unknown",
+      "actual": "200 kind=unknown",
+      "result": "PASS"
+    },
+    {
+      "id": "CHAT-04",
+      "name": "Chat amount edge case",
+      "request": "POST /api/chat text='coffee 0'...",
+      "expected": "unknown",
+      "actual": "200 kind=unknown",
+      "result": "PASS"
+    },
+    {
+      "id": "CHAT-05",
+      "name": "Chat amount edge case",
+      "request": "POST /api/chat text='coffee 12.999'...",
+      "expected": "200; amount rounded or rejected, never a crash",
+      "actual": "200 kind=unknown",
+      "result": "PASS"
+    },
+    {
+      "id": "CHAT-06",
+      "name": "Chat amount edge case",
+      "request": "POST /api/chat text='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'...",
+      "expected": "200; text is cut to 300 chars before parsing, so an amount beyond the cut-off is lost (kind=unknown)",
+      "actual": "200 kind=unknown",
+      "result": "PASS"
+    },
+    {
+      "id": "GOAL-01",
+      "name": "Goal amount edge case rejected",
+      "request": "POST /api/goal NaN token",
+      "expected": "400",
+      "actual": "400 ",
+      "result": "PASS"
+    },
+    {
+      "id": "GOAL-02",
+      "name": "Goal amount edge case rejected",
+      "request": "POST /api/goal Infinity token",
+      "expected": "400",
+      "actual": "400 ",
+      "result": "PASS"
+    },
+    {
+      "id": "GOAL-03",
+      "name": "Goal amount edge case rejected",
+      "request": "POST /api/goal 1e999 float overflow",
+      "expected": "400",
+      "actual": "400 ",
+      "result": "PASS"
+    },
+    {
+      "id": "GOAL-04",
+      "name": "Goal amount edge case rejected",
+      "request": "POST /api/goal string amount",
+      "expected": "400",
+      "actual": "400 ",
+      "result": "PASS"
+    },
+    {
+      "id": "GOAL-05",
+      "name": "Goal values clamped (name<=60, target<=1e12, saved>=0)",
+      "request": "POST /api/goal huge/negative values",
+      "expected": "name len<=60, target==10**12, saved==0",
+      "actual": "200 row=[('capcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcap', 1000000000000, 0)]",
+      "result": "PASS"
+    },
+    {
+      "id": "GOAL-06",
+      "name": "Deposit clamped",
+      "request": "POST /api/goal/deposit amount=10**30",
+      "expected": "saved_cents <= 10**12",
+      "actual": "200 saved=[(1000000000000,)]",
+      "result": "PASS"
+    },
+    {
+      "id": "PROF-01",
+      "name": "Profile values clamped",
+      "request": "POST /api/profile payday=99 income=-50",
+      "expected": "payday 1..31, income >= 0",
+      "actual": "200 [(31, 0)]",
+      "result": "PASS"
+    },
+    {
+      "id": "FIX-01",
+      "name": "FIXED (was FAIL NUM-07): decimal-overflow amount 1e999999999 in CSV import no longer drops the connection; the row is skipped (HTTP 200, imported=0); server stays up",
+      "request": "POST /api/import amount='1e999999999'",
+      "expected": "200 with imported=0 and skipped=1 (never a dropped connection / 5xx), no row added, server alive",
+      "actual": "200  {\"read\": 1, \"imported\": 0, \"duplicates\": 0, \"skipped\": 1, \"silent\": 0, \"digest\": 0, \"ask\": rows_added=0 alive=True",
+      "result": "PASS"
+    },
+    {
+      "id": "FIX-03",
+      "name": "Overflowing number on a JSON API field (float inf -> OverflowError) is a clean 400 via the server-level ArithmeticError handler",
+      "request": "POST /api/goal target_cents=1e999999999",
+      "expected": "400 bad_input, server alive",
+      "actual": "400 bad_input alive=True",
+      "result": "PASS"
+    },
+    {
+      "id": "FIX-02",
+      "name": "FIXED (was FAIL BODY-14): 200 000-deep JSON array -> clean 400 (see BODY-14/14b)",
+      "request": "POST /api/chat 200k-deep array",
+      "expected": "400, server alive",
+      "actual": "400  alive=True",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-01",
+      "name": "Odd merchant strings round-trip verbatim through parameterised INSERT (CSV)",
+      "request": "POST /api/import with 7 injection-style merchants",
+      "expected": "all stored verbatim, tables intact",
+      "actual": "200 report={'read': 7, 'imported': 7, 'duplicates': 0, 'skipped': 0, 'silent': 1, 'digest': 6, 'ask': 0} verbatim={0: True, 1: True, 2: True, 3: True, 4: True, 6: True} nul_variant_verbatim=True",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-02",
+      "name": "No table dropped, goals not modified by injection strings",
+      "request": "sqlite_master + goals after SQL-01",
+      "expected": "transactions, goals, merchant_memory, profile exist; goals unchanged",
+      "actual": "tables=['audit', 'consent', 'goals', 'login_attempts', 'merchant_memory', 'profile', 'sessions', 'sqlite_sequence', 'transactions', 'users'] goals_equal=True",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-03",
+      "name": "Filter q with ' OR '1'='1 behaves as literal text",
+      "request": "GET /api/transactions?q=' OR '1'='1",
+      "expected": "only rows containing the literal string, far fewer than total",
+      "actual": "1 of 381 rows; merchants=[\"' OR '1'='1\"]",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-04",
+      "name": "Filter category with injection returns no rows",
+      "request": "GET /api/transactions?category=' OR '1'='1",
+      "expected": "0 items",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-05",
+      "name": "Filter year with injection rejected (int cast)",
+      "request": "GET /api/transactions?year=2026' OR 1=1--",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-01",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=99999",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-02",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=1800",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-03",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=2026&month=13",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-04",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=2026&month=0",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-05",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=2026&month=2&day=32",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-06",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=2026&month=2&day=0",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-07",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=-1",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-08",
+      "name": "Date filter out of range rejected (year 1900-2200, month 1-12, day 1-31)",
+      "request": "GET /api/transactions?year=9999999999999999999999999999999999999999",
+      "expected": "400",
+      "actual": "400",
+      "result": "PASS"
+    },
+    {
+      "id": "RANGE-09",
+      "name": "Control: in-range date filter accepted",
+      "request": "GET /api/transactions?year=2026&month=9&day=1",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-06",
+      "name": "Filter direction is whitelisted (unknown value ignored, not interpolated)",
+      "request": "GET /api/transactions?direction=out' OR '1'='1",
+      "expected": "200, no error",
+      "actual": "200 items=381",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-07",
+      "name": "Stored injection string is retrievable by search (round trip)",
+      "request": "GET /api/transactions?q=DROP TABLE",
+      "expected": "1 item, merchant verbatim",
+      "actual": "[\"Robert'); DROP TABLE transactions;--\"]",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-08",
+      "name": "SQL text in chat message is data, not code",
+      "request": "POST /api/chat \"Coffee'; DROP TABLE goals;-- 12\"",
+      "expected": "200, goals table still exists",
+      "actual": "200 kind=silent goals_table=True",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-09",
+      "name": "Very long search term handled (truncated to 40)",
+      "request": "GET /api/transactions?q=<5000 chars>",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "SQL-10",
+      "name": "Known minor: '_' in q acts as a LIKE wildcard ('%' is stripped)",
+      "request": "static review service.transactions",
+      "expected": "informational",
+      "actual": "no ESCAPE clause; harmless (read-only filter on own data)",
+      "result": "NOTE"
+    },
+    {
+      "id": "XSS-01",
+      "name": "XSS payload merchant via CSV stored verbatim (output-encoding is the defence)",
+      "request": "POST /api/import with 3 payload merchants",
+      "expected": "stored verbatim, not mangled or executed server-side",
+      "actual": "200 stored=['<img src=x onerror=alert(1)>', '<script>alert(1)</script>', '\"><svg/onload=alert(1)>']",
+      "result": "PASS"
+    },
+    {
+      "id": "XSS-02",
+      "name": "XSS payload via chat accepted as text only",
+      "request": "POST /api/chat '<img src=x onerror=alert(2)> 15'",
+      "expected": "200 JSON with the literal string",
+      "actual": "200 ct=application/json; charset=utf-8 merchant=<img src=x onerror=alert(2)>",
+      "result": "PASS"
+    },
+    {
+      "id": "XSS-03",
+      "name": "API returns JSON only with nosniff (browser will not render it as HTML)",
+      "request": "GET /api/transactions?q=onerror",
+      "expected": "Content-Type application/json; X-Content-Type-Options nosniff; payload present as JSON string",
+      "actual": "ct=application/json; charset=utf-8 nosniff=nosniff has_payload=True",
+      "result": "PASS"
+    },
+    {
+      "id": "XSS-04",
+      "name": "Export is JSON (attachment-style download is created client-side)",
+      "request": "GET /api/export",
+      "expected": "application/json",
+      "actual": "application/json; charset=utf-8",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-01",
+      "name": "esc() escapes & < > \" '",
+      "request": "grep frontend/app.js 'const esc'",
+      "expected": "all five characters mapped",
+      "actual": "String(s ?? \"\").replace(/[&<>\"']/g, (c) => ({ \"&\": \"&amp;\", \"<\": \"&lt;\", \">\": \"&gt;\", '\"': \"&quot;\", \"'\": \"&#39;\" }[c]));",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-02",
+      "name": "HTML sinks inventory",
+      "request": "grep innerHTML/insertAdjacentHTML/outerHTML in frontend/*.js",
+      "expected": "informational",
+      "actual": "{'app.js': 21, 'auth.js': 10, 'bench.js': 2, 'insights.js': 1, 'invest2.js': 1, 'trust.js': 1, 'voicedemo.js': 1}; eval/new Function/document.write: 0",
+      "result": "NOTE"
+    },
+    {
+      "id": "FE-03",
+      "name": "Interpolations of user-controlled fields into HTML are wrapped in esc() (heuristic scan + manual triage)",
+      "request": "scan frontend/*.js for ${...} containing merchant/name/nickname/email/title/url without esc(",
+      "expected": "0 unresolved; helper-wrapped expressions verified by reading call sites",
+      "actual": "flagged=1 unresolved=[]",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-04",
+      "name": "avatarURL() allow-list regex accepts only png/jpeg/webp base64 data URIs",
+      "request": "evaluate the regex from app.js against hostile values",
+      "expected": "good accepted; 6 hostile rejected",
+      "actual": "good=True hostile_accepted=[False, False, False, False, False, False]",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-05",
+      "name": "Consent gate (client-side) wraps CSV import, photo scan, scan FAB and demo load",
+      "request": "grep consentOk() call sites in app.js",
+      "expected": "4 ingestion entry points gated",
+      "actual": "call sites=4 gated=['csv-file', 'photo', 'scan-fab', 'demo']",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-06",
+      "name": "Consent is enforced server-side for all ingestion endpoints incl. free-text chat (client gate is only UX)",
+      "request": "inspect server.CONSENT_GATED",
+      "expected": "{/api/import, /api/scan, /api/chat, /api/demo}",
+      "actual": "['/api/chat', '/api/demo', '/api/import', '/api/scan']; client sendChat calls consentOk=False",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-12",
+      "name": "auth.js keeps no password/token in browser storage (session = HttpOnly cookie)",
+      "request": "grep frontend/auth.js for localStorage/sessionStorage/store.set",
+      "expected": "no direct storage use; only lang/consent_v1 cache keys written",
+      "actual": "direct storage calls=0; store.set keys=['lang']",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-13",
+      "name": "Client handles 401 (re-login), 403 stepup_required (password modal) and 428 consent_required",
+      "request": "grep frontend/auth.js",
+      "expected": "all three handled",
+      "actual": "401=True stepup=True 428=True",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-07",
+      "name": "Delete-all asks for confirm() and then clears local profile keys",
+      "request": "read data-a=delall handler in app.js",
+      "expected": "confirm() + POST /delete-all + removes nickname/name/email/phone/avatar",
+      "actual": "confirm=True api=True clears=['nickname', 'name', 'email', 'phone', 'avatar']",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-08",
+      "name": "Delete-all also clears the cached consent timestamp (consent_v1) in the browser; theme/language/bank-sim keys are not cleared (not personal data)",
+      "request": "read delall handler",
+      "expected": "consent_v1 cleared",
+      "actual": "consent_v1 cleared=True",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-09",
+      "name": "Export builds a client-side Blob download from GET /export; withdraw consent asks confirm()",
+      "request": "read trust.js",
+      "expected": "api('/export') + Blob + confirm(wdConfirm)",
+      "actual": "export=True withdraw_confirm=True",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-10",
+      "name": "No third-party CDN/font/script references in index.html, styles.css, manifest.json",
+      "request": "grep http(s):// in shell files",
+      "expected": "0 external resources",
+      "actual": "[]",
+      "result": "PASS"
+    },
+    {
+      "id": "FE-11",
+      "name": "LAN token kept in sessionStorage (tab-scoped) and stripped from the address bar",
+      "request": "read TOKEN bootstrap in app.js",
+      "expected": "sessionStorage + replaceState",
+      "actual": "True",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-01",
+      "name": "Invalid media_type normalised before use",
+      "request": "POST /api/scan media_type='text/html; <script>...'",
+      "expected": "analyze() receives image/jpeg",
+      "actual": "200 kind=silent media_type_seen=image/jpeg",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-02",
+      "name": "Oversize image (~5.1 MB decoded) rejected",
+      "request": "POST /api/scan image=6.8M base64 chars",
+      "expected": "kind=error reason=too_large",
+      "actual": "200 {'kind': 'error', 'reason': 'too_large'}",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-03",
+      "name": "Scan rate limit (3 s, process-wide) engages on a rapid second call",
+      "request": "2x POST /api/scan back to back",
+      "expected": "second: reason=rate",
+      "actual": "first=silent second={'kind': 'error', 'reason': 'rate'}",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-04",
+      "name": "No API key configured -> flagged DEMO result, no outbound call",
+      "request": "POST /api/scan with ANTHROPIC_API_KEY unset",
+      "expected": "demo=true on first scan",
+      "actual": "True",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-05",
+      "name": "Injected model output: direction forced to 'out', confidence capped at 0.8, new merchant left pending",
+      "request": "simulated LLM reply with direction=in, confidence=1.0, 'SYSTEM:' text",
+      "expected": "direction=out, confidence<=0.8, status=pending",
+      "actual": "200 row(direction,category,confidence,status,mode)=[('out', 'income', 0.8, 'pending', 'digest')]",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-06",
+      "name": "API key goes only to api.anthropic.com in a header and never appears in any HTTP response",
+      "request": "inspect the patched urlopen call + response body",
+      "expected": "url=https://api.anthropic.com/v1/messages, key only in x-api-key, absent from response",
+      "actual": "url=https://api.anthropic.com/v1/messages header_present=True in_response=False",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-07",
+      "name": "The model request contains only the image and the fixed prompt (no ledger data, no balances)",
+      "request": "inspect request body sent to the (fake) API",
+      "expected": "content types == [image, text]; no 'amount_cents'/'balance' keys",
+      "actual": "parts=['image', 'text'] keys=['max_tokens', 'messages', 'model']",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-08",
+      "name": "Category outside whitelist -> 'other'; non-numeric confidence -> default",
+      "request": "simulated LLM reply category='../../etc/passwd'",
+      "expected": "category=other, confidence<=0.8",
+      "actual": "200 [('other', 0.6)]",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-09",
+      "name": "Overflow amount in model output handled",
+      "request": "simulated LLM reply amount=1e999999999",
+      "expected": "error reply, no crash",
+      "actual": "200  {'kind': 'error', 'reason': 'unreadable'}",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-10",
+      "name": "Non-JSON model output handled",
+      "request": "simulated LLM reply without JSON",
+      "expected": "error reply",
+      "actual": "200 {'kind': 'error', 'reason': 'unreadable'}",
+      "result": "PASS"
+    },
+    {
+      "id": "SCAN-11",
+      "name": "Known gap: a known merchant name (>=2 confirmations) is auto-recorded even from an injected receipt; amount is model-supplied",
+      "request": "static review service.process",
+      "expected": "informational",
+      "actual": "pending status is guaranteed only for unknown merchants",
+      "result": "NOTE"
+    },
+    {
+      "id": "EXP-01",
+      "name": "Export excludes the raw bank row and the bank transaction number",
+      "request": "GET /api/export after importing a row with canary strings",
+      "expected": "canaries stored in DB 'raw'/'ext_id' but absent from export",
+      "actual": "in_db=yes leaked=[]",
+      "result": "PASS"
+    },
+    {
+      "id": "EXP-02",
+      "name": "Export is an explicit allow-list of fields",
+      "request": "GET /api/export",
+      "expected": "tx keys subset of {id,date,amount_cents,currency,merchant,category,direction,counterparty_type,source,confidence,status,mode,reason}",
+      "actual": "['amount_cents', 'category', 'confidence', 'counterparty_type', 'currency', 'date', 'direction', 'id', 'merchant', 'mode', 'reason', 'source', 'status']",
+      "result": "PASS"
+    },
+    {
+      "id": "EXP-03",
+      "name": "Export structure (profile, goals, transactions, merchant_memory) and timestamp",
+      "request": "GET /api/export",
+      "expected": "keys present",
+      "actual": "['exported_at', 'goals', 'merchant_memory', 'note', 'profile', 'transactions']",
+      "result": "PASS"
+    },
+    {
+      "id": "EXP-04",
+      "name": "Normal API responses (state, history) never contain the raw bank row",
+      "request": "GET /api/state + /api/transactions",
+      "expected": "canaries absent",
+      "actual": "[]",
+      "result": "PASS"
+    },
+    {
+      "id": "EXP-05",
+      "name": "Known gap: 'raw' (first 300 chars of each imported CSV row) is stored unencrypted in SQLite",
+      "request": "static review + EXP-01 stored value",
+      "expected": "informational",
+      "actual": "raw stored='2026-07-05,payment,Export Probe Shop,RAWNOTE-SECRET-4455 BAN'",
+      "result": "NOTE"
+    },
+    {
+      "id": "NEWS-01",
+      "name": "Feed list is a fixed constant of http(s) URLs",
+      "request": "inspect news.FEEDS",
+      "expected": "all schemes in {http, https}; no user-supplied URL input",
+      "actual": "n=7 schemes=['http', 'https']",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-02",
+      "name": "Hostile query parameters do not change what is fetched",
+      "request": "GET /api/news?cat=<script>&url=http://127.0.0.1:8000/&feed=file:///etc/passwd",
+      "expected": "only FEEDS urls fetched; unknown cat treated as 'all'",
+      "actual": "200 fetched_outside_allowlist=[] live=False",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-03",
+      "name": "With all feeds unreachable the endpoint falls back to labelled samples with empty links",
+      "request": "GET /api/news (patched fetch -> None)",
+      "expected": "items all sample=true and url==''",
+      "actual": "[(True, ''), (True, '')]",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-04",
+      "name": "POST /api/news/refresh ignores any URL in the body",
+      "request": "POST /api/news/refresh {url: http://169.254.169.254/...}",
+      "expected": "only FEEDS fetched",
+      "actual": "200 fetched_outside=[]",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-05",
+      "name": "Only http(s) links survive feed parsing (javascript:, data:, file:, ftp:, relative dropped)",
+      "request": "news._parse_feed on a crafted RSS with 9 items",
+      "expected": "3 items kept, all http/https",
+      "actual": "kept=['http://example.com/a', 'https://example.com/b', 'https://example.com/c']",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-06",
+      "name": "HTML tags are stripped from feed titles",
+      "request": "title '<b>Tagged</b> title <script>x</script>'",
+      "expected": "no '<' in titles",
+      "actual": "['Tagged title x']",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-07",
+      "name": "Atom href links filtered the same way",
+      "request": "news._parse_feed on Atom with javascript: href",
+      "expected": "only https kept",
+      "actual": "['https://ok.example/x']",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-08",
+      "name": "DOCTYPE / entity declarations (XXE, billion laughs) rejected before parsing",
+      "request": "news._parse_feed on a feed with <!DOCTYPE>/<!ENTITY>",
+      "expected": "rejected",
+      "actual": "rejected: doctype",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-09",
+      "name": "Redirects to non-http(s) schemes are refused",
+      "request": "news._HttpOnly.redirect_request",
+      "expected": "file/ftp/gopher refused; http(s) followed",
+      "actual": "{'file:///etc/passwd': False, 'ftp://x/y': False, 'gopher://x': False, 'https://ok.example/rss': True, 'http://127.0.0.1:8000/': True}",
+      "result": "PASS"
+    },
+    {
+      "id": "NEWS-10",
+      "name": "Known gap (SSRF scope): a redirect from an allow-listed feed to http://127.0.0.1 or a private IP is followed",
+      "request": "same test as NEWS-09",
+      "expected": "informational",
+      "actual": "redirect to http://127.0.0.1:8000/ followed=True; response body is parsed as XML only, never returned raw, capped at 1 MiB",
+      "result": "NOTE"
+    },
+    {
+      "id": "LAN-01",
+      "name": "--lan: API without X-Token -> 401",
+      "request": "GET /api/state (token mode)",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-02",
+      "name": "--lan: wrong token -> 401",
+      "request": "GET /api/state X-Token: wrong",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-03",
+      "name": "--lan: prefix of the token -> 401",
+      "request": "GET /api/state X-Token: <token minus last char>",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-04",
+      "name": "--lan: correct token -> 200",
+      "request": "GET /api/state X-Token: <token>",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-05",
+      "name": "--lan: POST without token -> 401 (before any state change)",
+      "request": "POST /api/chat (no token)",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-06",
+      "name": "--lan: delete-all without token -> 401 and data intact",
+      "request": "POST /api/delete-all (no token)",
+      "expected": "401, rows still present",
+      "actual": "401 rows=391",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-07",
+      "name": "--lan: export without token -> 401",
+      "request": "GET /api/export (no token)",
+      "expected": "401",
+      "actual": "401",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-08",
+      "name": "--lan: LAN IP Host accepted only in LAN mode",
+      "request": "GET /api/state Host: 192.168.0.111:port + token",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-09",
+      "name": "--lan: arbitrary Host still rejected even with a valid token",
+      "request": "GET /api/state Host: evil.example + token",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-10",
+      "name": "Known by design: static shell (no data) is served without the token",
+      "request": "GET / (token mode, no token)",
+      "expected": "200",
+      "actual": "200",
+      "result": "NOTE"
+    },
+    {
+      "id": "LAN-11",
+      "name": "--lan: non-ASCII token header does not crash comparison",
+      "request": "GET /api/state X-Token: ünï (latin-1 bytes)",
+      "expected": "401, not 5xx",
+      "actual": "401 ",
+      "result": "PASS"
+    },
+    {
+      "id": "LAN-12",
+      "name": "Token strength and transport (static review)",
+      "request": "server.py: secrets.token_urlsafe(8), compare_digest, HTTP only",
+      "expected": "informational",
+      "actual": "8 random bytes (~64 bits), constant-time compare, per-run; the token is only an extra network gate: a valid account + session cookie is still required; guesses are limited only by the per-IP request limit (240/min); sent in clear over HTTP unless a certificate is supplied",
+      "result": "NOTE"
+    },
+    {
+      "id": "LAN-13",
+      "name": "Default (local) mode: LAN IP Host rejected",
+      "request": "GET /api/state Host: 192.168.0.111",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-00",
+      "name": "Owner (with step-up) creates a guest; weak password and case-variant duplicate are refused",
+      "request": "POST /api/auth/viewer x3",
+      "expected": "400 password_too_short; 200 role=viewer; 409 username_taken",
+      "actual": "400 password_too_short; 200 viewer; 409 username_taken",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-01",
+      "name": "Viewer can use every READ-tier route",
+      "request": "viewer cookie on all READ routes in POLICY (incl. POST /api/ask)",
+      "expected": "all 200",
+      "actual": "{'POST /api/ask': 200, 'GET /api/benchmark': 200, 'GET /api/insights': 200, 'GET /api/lessons': 200, 'GET /api/news': 200, 'GET /api/report': 200, 'GET /api/research': 200, 'GET /api/state': 200, 'GET /api/transactions': 200}",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-02",
+      "name": "Viewer is refused on every WRITE-tier route (403 forbidden)",
+      "request": "viewer cookie on all WRITE routes in POLICY",
+      "expected": "all 403 forbidden",
+      "actual": "{'POST /api/auth/password': '403 forbidden', 'POST /api/chat': '403 forbidden', 'POST /api/confirm': '403 forbidden', 'POST /api/consent': '403 forbidden', 'POST /api/consent/withdraw': '403 forbidden', 'POST /api/goal': '403 forbidden', 'POST /api/goal/delete': '403 forbidden', 'POST /api/goal/deposit': '403 forbidden', 'POST /api/import': '403 forbidden', 'POST /api/lessons/reset': '403 forbidde",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-03",
+      "name": "No state changed by the viewer's refused WRITE calls (tx, goals, consent, users, owner password hash)",
+      "request": "DB before/after TIER-02",
+      "expected": "identical",
+      "actual": "equal=True",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-04",
+      "name": "Viewer is refused on every SENSITIVE route (403 forbidden) even after a successful step-up with its own password (role is checked first; step-up is not elevation)",
+      "request": "viewer step-up 200, then all SENSITIVE routes",
+      "expected": "step-up 200; all 403 forbidden",
+      "actual": "{'POST /api/auth/users/delete': '403 forbidden', 'POST /api/auth/viewer': '403 forbidden', 'POST /api/delete-all': '403 forbidden', 'POST /api/demo': '403 forbidden', 'GET /api/export': '403 forbidden'}",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-05",
+      "name": "Viewer cannot read the audit log or the user list (OWNER tier)",
+      "request": "viewer cookie on OWNER routes",
+      "expected": "all 403 forbidden",
+      "actual": "{'GET /api/audit': '403 forbidden', 'GET /api/auth/users': '403 forbidden'}",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-06",
+      "name": "Owner account cannot be deleted through the API (even by the owner with step-up)",
+      "request": "POST /api/auth/users/delete {username: owner}",
+      "expected": "409 cannot_delete_owner, user still present",
+      "actual": "409 cannot_delete_owner users=2",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-07",
+      "name": "Deleting a guest kills its live session immediately",
+      "request": "login tmp_guest, owner deletes it, reuse cookie",
+      "expected": "200 -> delete 200 -> 401",
+      "actual": "200 -> 200 -> 401",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-08",
+      "name": "User list exposes no password hash, salt or token",
+      "request": "GET /api/auth/users",
+      "expected": "keys limited to username, role, created_at, disabled",
+      "actual": "['created_at', 'disabled', 'role', 'username']",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-09",
+      "name": "Viewer can sign out (SESSION tier); the cookie is then dead",
+      "request": "POST /api/auth/logout then GET /api/state",
+      "expected": "200 then 401",
+      "actual": "200 then 401",
+      "result": "PASS"
+    },
+    {
+      "id": "TIER-10",
+      "name": "Residual: the guest role reads the owner's single dataset (state, transactions, insights, report); there is no per-guest scoping",
+      "request": "static review",
+      "expected": "informational",
+      "actual": "ledger tables have no user column",
+      "result": "NOTE"
+    },
+    {
+      "id": "LOCK-01",
+      "name": "Uniform error: wrong password for a real user and any password for an unknown user return the identical 401 body",
+      "request": "login lock_victim vs ghost_user_zz (wrong password)",
+      "expected": "same status and same JSON",
+      "actual": "401 {\"error\": \"invalid_credentials\"} | 401 {\"error\": \"invalid_credentials\"}",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-02",
+      "name": "5th consecutive failure locks the account/IP pair: 429 with error=locked and retry_after",
+      "request": "5 wrong passwords for lock_victim",
+      "expected": "statuses 401,401,401,401,429; retry_after in 1..60",
+      "actual": "[401, 401, 401, 401, 429] body={'error': 'locked', 'retry_after': 60}",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-03",
+      "name": "The CORRECT password is also refused while locked (no lock bypass)",
+      "request": "login lock_victim with the right password during the lock",
+      "expected": "429 locked",
+      "actual": "429 locked cookie_issued=False",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-04",
+      "name": "Unknown usernames lock the same way (no user enumeration through lockout behaviour)",
+      "request": "5 wrong logins for a username that does not exist",
+      "expected": "401,401,401,401,429",
+      "actual": "[401, 401, 401, 401, 429]",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-05",
+      "name": "Lockout is per (IP, username): another account is unaffected",
+      "request": "owner login while lock_victim and ghost are locked",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-06",
+      "name": "Back-off doubles for each further failure (6th failure -> ~120 s)",
+      "request": "after the first lock expired (clock +62 s), one more wrong login for ghost_user_zz",
+      "expected": "429 retry_after in 100..120",
+      "actual": "429 {'error': 'locked', 'retry_after': 120}",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-07",
+      "name": "Lock expires after retry_after; a correct login then succeeds and clears the failure counter",
+      "request": "clock +62 s, correct password",
+      "expected": "200 and no login_attempts row left",
+      "actual": "200 rows_left=0",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-08",
+      "name": "Oversized / wrongly typed / missing credentials -> 401, never 500",
+      "request": "login with 100-char name, 10 000-char password, list/dict types, empty body",
+      "expected": "401 x4",
+      "actual": "[401, 401, 401, 401]",
+      "result": "PASS"
+    },
+    {
+      "id": "LOCK-09",
+      "name": "Residual: lock key is (IP, username): an attacker rotating usernames gets 5 tries per name; no CAPTCHA, no global threshold; the per-IP request limit (240/min) still applies",
+      "request": "static review auth.lock_key",
+      "expected": "informational",
+      "actual": "LOCK_AFTER=5 LOCK_BASE=60s LOCK_MAX=900s",
+      "result": "NOTE"
+    },
+    {
+      "id": "ORG-01",
+      "name": "Cross-origin POST with a valid session cookie is rejected by the Origin check",
+      "request": "POST /api/chat Origin: http://evil.example",
+      "expected": "403 bad_origin, nothing stored",
+      "actual": "403 bad_origin rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "ORG-02",
+      "name": "Cross-origin POST with a valid session cookie is rejected by the Origin check",
+      "request": "POST /api/chat Origin: null",
+      "expected": "403 bad_origin, nothing stored",
+      "actual": "403 bad_origin rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "ORG-03",
+      "name": "Cross-origin POST with a valid session cookie is rejected by the Origin check",
+      "request": "POST /api/chat Origin: http://127.0.0.1:1",
+      "expected": "403 bad_origin, nothing stored",
+      "actual": "403 bad_origin rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "ORG-04",
+      "name": "Cross-origin POST with a valid session cookie is rejected by the Origin check",
+      "request": "POST /api/chat Origin: https://127.0.0.1:60643.evil.example",
+      "expected": "403 bad_origin, nothing stored",
+      "actual": "403 bad_origin rows_added=0",
+      "result": "PASS"
+    },
+    {
+      "id": "ORG-05",
+      "name": "CSRF scenario: delete-all from a foreign origin with a valid session AND an open step-up window is refused; data intact",
+      "request": "POST /api/delete-all Origin: http://evil.example",
+      "expected": "403 bad_origin, rows intact",
+      "actual": "403 bad_origin tx=391",
+      "result": "PASS"
+    },
+    {
+      "id": "ORG-06",
+      "name": "Same-origin POST (Origin = Host) is accepted",
+      "request": "POST /api/chat Origin: http://127.0.0.1:<port>",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "ORG-07",
+      "name": "The Origin check runs before the session lookup (foreign origin -> 403 even without a cookie)",
+      "request": "POST /api/chat Origin: http://evil.example (no cookie)",
+      "expected": "403",
+      "actual": "403",
+      "result": "PASS"
+    },
+    {
+      "id": "ORG-08",
+      "name": "Second layer: SameSite=Strict cookie (COOKIE-01) and application/json-only POSTs (CT-01..05); GETs are not Origin-checked but carry no side effects (MISC-01) and have no CORS header (HDR-01..04)",
+      "request": "static review",
+      "expected": "informational",
+      "actual": "defence in depth",
+      "result": "NOTE"
+    },
+    {
+      "id": "AUD-01",
+      "name": "Audit log (owner) lists events and reports the chain as intact",
+      "request": "GET /api/audit?limit=500",
+      "expected": "chain_ok=true, first_broken_id=null; setup/login/stepup present",
+      "actual": "200 entries=145 chain_ok=True actions=['GET /api/does-not-exist', 'GET /api/export', 'GET /api/export [denied]', 'POST /api/auth/password [denied]', 'POST /api/auth/users/delete', 'POST /api/auth/users/delete [denied]', 'POST /api/auth/viewer', 'POST /api/auth/viewer [denied]']...",
+      "result": "PASS"
+    },
+    {
+      "id": "AUD-02",
+      "name": "Independent re-computation of the chain in this script (SHA-256 over prev|ts|user|role|action|status|ip) matches every stored hash",
+      "request": "recompute 145 rows",
+      "expected": "all rows match, first prev_hash = 64 zeros",
+      "actual": "rows=145 match=True genesis_ok=True",
+      "result": "PASS"
+    },
+    {
+      "id": "AUD-03",
+      "name": "Editing one audit row is detected (chain_ok=false, first_broken_id = that row); restoring it repairs the verdict",
+      "request": "UPDATE audit SET action='tampered' WHERE id=73 (direct SQLite write), then restore",
+      "expected": "chain_ok=false first_broken_id=73; after restore chain_ok=true",
+      "actual": "tampered: ok=False broken=73; restored: ok=True",
+      "result": "PASS"
+    },
+    {
+      "id": "AUD-04",
+      "name": "Deleting an audit row is detected as well (the next row no longer links)",
+      "request": "DELETE FROM audit WHERE id=73, then re-insert",
+      "expected": "chain_ok=false; after re-insert true",
+      "actual": "deleted: ok=False broken=74; reinserted: ok=True",
+      "result": "PASS"
+    },
+    {
+      "id": "AUD-05",
+      "name": "The audit log never contains passwords or session tokens (only who/what/outcome/IP)",
+      "request": "search the audit table dump for known passwords and the live token",
+      "expected": "none found",
+      "actual": "[]",
+      "result": "PASS"
+    },
+    {
+      "id": "AUD-06",
+      "name": "Denials, failed/locked logins, consent refusals and failed step-ups are all audited",
+      "request": "count audit rows per event kind",
+      "expected": "each kind >= 1",
+      "actual": "{'viewer denial': 20, 'failed login': 14, 'locked login': 4, 'consent 428': 5, 'step-up required': 6, 'failed step-up': 1}",
+      "result": "PASS"
+    },
+    {
+      "id": "AUD-07",
+      "name": "Plain reads are not audited (log stays about security-relevant changes); /api/audit itself is not audited",
+      "request": "3 x GET read + 1 x GET /api/audit",
+      "expected": "row count unchanged",
+      "actual": "145 -> 145",
+      "result": "PASS"
+    },
+    {
+      "id": "AUD-08",
+      "name": "Export (SENSITIVE) is audited with the user, role and IP",
+      "request": "last 'GET /api/export' audit row",
+      "expected": "owner/owner/ok/127.0.0.1",
+      "actual": "[('selftest_owner', 'owner', 'GET /api/export', 'ok', '127.0.0.1')]",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-01",
+      "name": "Stored credentials: 64-hex PBKDF2 hash, 16-byte (32-hex) salt, 600 000 iterations per user",
+      "request": "SELECT username,pwd_hash,salt,iterations FROM users",
+      "expected": "all users match",
+      "actual": "[('selftest_owner', '684641bc...', 'f92ab9ff...', 600000), ('selftest_guest', '397bd566...', '03a0eb74...', 600000), ('lock_victim', '9b179203...', '880770c7...', 600000)]",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-02",
+      "name": "The stored hash equals PBKDF2-HMAC-SHA256(password, salt, 600000) computed independently",
+      "request": "recompute with hashlib.pbkdf2_hmac in this script",
+      "expected": "equal",
+      "actual": "equal=True (0.24 s per guess = brute-force cost per candidate on this machine)",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-03",
+      "name": "Same password hashed twice gives different hash and salt (per-user random salt)",
+      "request": "auth.hash_password x2",
+      "expected": "different",
+      "actual": "hash_equal=False salt_equal=False",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-04",
+      "name": "Passwords do not appear in plaintext anywhere in the SQLite file",
+      "request": "byte-scan the DB file for the owner and guest passwords",
+      "expected": "not found",
+      "actual": "found=[] (file 217088 bytes)",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-05",
+      "name": "Session tokens are stored only as SHA-256(token); the raw token is not in the DB file",
+      "request": "sessions table + byte-scan for the live cookie value",
+      "expected": "sha256(token) present, raw token absent",
+      "actual": "hash_present=True raw_in_file=False columns=['token_hash', 'user_id', 'created_at', 'last_seen', 'stepup_until', 'ip']",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-06",
+      "name": "No API reply contains a password, hash, salt or session token",
+      "request": "GET users, audit, state, export, status",
+      "expected": "none",
+      "actual": "none",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-07",
+      "name": "Constant-time comparisons (hmac.compare_digest) for password hashes and the LAN token; dummy hash for unknown users",
+      "request": "static review auth.py/server.py",
+      "expected": "compare_digest used; _dummy_verify called in authenticate()",
+      "actual": "auth.compare_digest=True server.compare_digest=True dummy=True",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-08",
+      "name": "Password policy boundaries (>=8 and <=256 chars, not one repeated character, not equal to the username)",
+      "request": "POST /api/auth/viewer with boundary passwords",
+      "expected": "7:400, 8:200, repeat:400, equals-user:400, 257:400",
+      "actual": "{'7 chars': 400, '8 chars ok': 200, 'repeat': 400, 'equals user': 400, '257 chars': 400}",
+      "result": "PASS"
+    },
+    {
+      "id": "SEC-09",
+      "name": "Changing the password needs the current one, invalidates all OTHER sessions, keeps the current one, and the old password stops working",
+      "request": "POST /api/auth/password (wrong old, then correct), second session, old-password login",
+      "expected": "403; 200; other session 401; own 200; old password login 401",
+      "actual": "403; 200; other=401; own=200; old_login=401; revert=200",
+      "result": "PASS"
+    },
+    {
+      "id": "RATE-01",
+      "name": "Per-IP request limit on /api: requests beyond the limit get 429 rate_limited + retry_after (limit lowered to 5 for the test; production default 240 per 60 s)",
+      "request": "8 x GET /api/auth/status with RATE_LIMIT=5",
+      "expected": "200 x5 then 429 x3 with retry_after=60",
+      "actual": "[200, 200, 200, 200, 200, 429, 429, 429] {'error': 'rate_limited', 'retry_after': 60}",
+      "result": "PASS"
+    },
+    {
+      "id": "RATE-02",
+      "name": "Static files are not counted by the API limiter",
+      "request": "8 x GET /app.js with RATE_LIMIT=5",
+      "expected": "200 x8",
+      "actual": "[200, 200, 200, 200, 200, 200, 200, 200]",
+      "result": "PASS"
+    },
+    {
+      "id": "RATE-03",
+      "name": "Rate-limiter defaults",
+      "request": "server.RATE_LIMIT/RATE_WINDOW source defaults",
+      "expected": "240 per 60 s",
+      "actual": "240 per 60 s (source constants; run raised to 10**6 for the test bench)",
+      "result": "NOTE"
+    },
+    {
+      "id": "SESS-01",
+      "name": "Idle timeout 30 min (sliding): active at 1795 s, dead after a further 1805 s idle; row purged",
+      "request": "clock offsets on one session",
+      "expected": "200 then 401, session row deleted",
+      "actual": "200 then 401 rows_left=0",
+      "result": "PASS"
+    },
+    {
+      "id": "SESS-02",
+      "name": "Absolute lifetime 12 h cannot be extended by activity (request every 1700 s stays idle-valid, still dies after 43 200 s)",
+      "request": "26 requests with clock +1700 s each",
+      "expected": "200 until total offset <= 43200, then 401 at k=26",
+      "actual": "first 401 at k=26 (offset 44200s); statuses=[200, 200, 401]",
+      "result": "PASS"
+    },
+    {
+      "id": "SESS-03",
+      "name": "Auth constants as documented",
+      "request": "auth module",
+      "expected": "ITERATIONS 600000, LOCK_AFTER 5, LOCK_BASE 60, LOCK_MAX 900, MAX_USERS 20",
+      "actual": "600000, 5, 60, 900, 20",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-01",
+      "name": "Default mode is plain HTTP: no HSTS header, session cookie without Secure (documented residual risk)",
+      "request": "GET / on the default server",
+      "expected": "no strict-transport-security",
+      "actual": "hsts=False",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-02",
+      "name": "cookie_header(secure=True) adds Secure; plain mode does not",
+      "request": "auth.cookie_header",
+      "expected": "Secure only with TLS",
+      "actual": "plain='fc_session=x; HttpOnly; SameSite=Strict; Path=/; Max-Age=10' tls='fc_session=x; HttpOnly; SameSite=Strict; Path=/; Max-Age=10; Secure'",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-03",
+      "name": "Starting with a missing/incomplete --tls-cert/--tls-key refuses to start (no silent downgrade to HTTP)",
+      "request": "server._tls_context() with --tls-cert only (missing files)",
+      "expected": "SystemExit with an explanation",
+      "actual": "SystemExit: TLS needs BOTH --tls-cert FILE and --tls-key FILE pointing t",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-04",
+      "name": "Real TLS handshake with a throw-away self-signed certificate (verified against it): TLS >= 1.2 negotiated, API answers over HTTPS",
+      "request": "HTTPS GET /api/auth/status with --tls-cert/--tls-key",
+      "expected": "200 over TLSv1.2/1.3; minimum_version = TLSv1.2",
+      "actual": "200 TLSv1.3 server_min=TLSv1_2",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-05",
+      "name": "Over TLS the server sends Strict-Transport-Security",
+      "request": "HTTPS GET /api/auth/status",
+      "expected": "strict-transport-security: max-age=31536000",
+      "actual": "max-age=31536000",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-06",
+      "name": "Over TLS the session cookie carries Secure + HttpOnly + SameSite=Strict",
+      "request": "HTTPS POST /api/auth/login",
+      "expected": "all three flags",
+      "actual": "status=200 flags=HttpOnly; SameSite=Strict; Path=/; Max-Age=43200; Secure",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-07",
+      "name": "A plain-HTTP request to the TLS port gets no application response",
+      "request": "HTTP GET to the HTTPS port",
+      "expected": "no HTTP reply (status 0)",
+      "actual": "0 RemoteDisconnected: Remote end closed connection without response",
+      "result": "PASS"
+    },
+    {
+      "id": "TLS-08",
+      "name": "Residual: the app does not generate or renew certificates and has no HTTP->HTTPS redirect; production TLS is expected via the --tls flags or a reverse proxy",
+      "request": "static review",
+      "expected": "informational",
+      "actual": "owner supplies cert/key",
+      "result": "NOTE"
+    },
+    {
+      "id": "DEMO-01",
+      "name": "Default start creates no account at all (no default credentials); 'demo' user does not exist unless --demo-account is used",
+      "request": "SELECT FROM users WHERE username='demo' in the main throw-away DB",
+      "expected": "0 rows",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DEMO-02",
+      "name": "--demo-account: creates ONE owner 'demo' (hashed, 600k iterations), password from FC_DEMO_PASSWORD never printed or stored in clear, loud 'NOT FOR PRODUCTION' banner, idempotent",
+      "request": "server._demo_account() twice on a separate throw-away DB",
+      "expected": "1 user role=owner, hash only, banner printed, second call keeps the password",
+      "actual": "users=1 role=owner iterations=600000 banner=True pw_in_stdout=False pw_in_file=False second='already exists' in out=True",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-00",
+      "name": "Precondition: data present before delete-all",
+      "request": "state of the throw-away DB",
+      "expected": "tx>0, goals>0, memory>0, custom profile",
+      "actual": "{'tx': 393, 'goals': 4, 'mem': 22, 'profile': (17, 123400)} canary_in_file=True",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-01",
+      "name": "delete-all empties transactions, goals and merchant_memory",
+      "request": "POST /api/delete-all",
+      "expected": "0 / 0 / 0",
+      "actual": "200 {'tx': 0, 'goals': 0, 'mem': 0, 'profile': (5, 900000)}",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-02",
+      "name": "delete-all resets the profile to defaults (payday 5, income 9000.00 CNY)",
+      "request": "POST /api/delete-all",
+      "expected": "(5, 900000)",
+      "actual": "(5, 900000)",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-03",
+      "name": "Deleted text is no longer present in the database file (VACUUM)",
+      "request": "byte-scan of the SQLite file for a canary merchant",
+      "expected": "present before, absent after",
+      "actual": "before=True after=False",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-04",
+      "name": "Export after delete-all is empty",
+      "request": "GET /api/export",
+      "expected": "transactions=[], goals=[], merchant_memory=[]",
+      "actual": "0/0/0",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-05",
+      "name": "API still functional on an empty ledger",
+      "request": "GET /api/state",
+      "expected": "200",
+      "actual": "200",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-06",
+      "name": "delete-all removes the consent record (right to erasure) and the next ingestion needs consent again",
+      "request": "POST /api/delete-all, then DB + POST /api/chat",
+      "expected": "consent rows 1 -> 0; chat -> 428",
+      "actual": "consent before=1 after=0 chat=428",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-07",
+      "name": "delete-all keeps accounts (users unchanged) and the audit log (grows, chain intact)",
+      "request": "DB before/after + GET /api/audit",
+      "expected": "users identical, audit rows increased, chain_ok",
+      "actual": "users_equal=True audit 160->167",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-08",
+      "name": "delete-all resets server-side lessons progress to pack 1 (throw-away state file)",
+      "request": "lessons state file before/after",
+      "expected": "version 3 -> 1",
+      "actual": "after=1",
+      "result": "PASS"
+    },
+    {
+      "id": "DEL-09",
+      "name": "delete-all is audited (action + user + outcome)",
+      "request": "audit table",
+      "expected": "an entry 'POST /api/delete-all' with status ok for the owner",
+      "actual": "[('selftest_owner', 'owner', 'POST /api/delete-all', 'ok')]",
+      "result": "PASS"
+    },
+    {
+      "id": "MISC-01",
+      "name": "Every state-changing route is POST-only (no GET mutations)",
+      "request": "static review of server.do_GET",
+      "expected": "do_GET has no write calls",
+      "actual": "writes in do_GET=False",
+      "result": "PASS"
+    },
+    {
+      "id": "MISC-02",
+      "name": "Residual: one dataset per installation. The guest role shares the owner's data read-only; consent is one global record; no per-user data partitioning",
+      "request": "static review (db.py schema: no user_id on ledger tables)",
+      "expected": "informational",
+      "actual": "transactions/goals/profile/consent tables have no owner column",
+      "result": "NOTE"
+    },
+    {
+      "id": "MISC-03",
+      "name": "Residual: no encryption at rest (SQLite file, exports); plain HTTP unless --tls-cert/--tls-key; file permissions are the OS's",
+      "request": "static review",
+      "expected": "informational",
+      "actual": "db file in throw-away dir: throwaway.db",
+      "result": "NOTE"
+    },
+    {
+      "id": "MISC-04",
+      "name": "Residual: ThreadingHTTPServer per-request thread, 15 s socket timeout, no connection cap; only a per-IP request counter protects it (slow-client exhaustion possible)",
+      "request": "static review server.setup()/rate_ok()",
+      "expected": "informational",
+      "actual": "timeout=15 s; RATE_LIMIT=240 requests/60 s per IP on /api only",
+      "result": "NOTE"
+    },
+    {
+      "id": "MISC-05",
+      "name": "Residual: audit log is tamper-EVIDENT, not tamper-proof (someone with write access to the DB file can recompute the whole chain); no off-box anchoring",
+      "request": "static review audit.py",
+      "expected": "informational",
+      "actual": "chain = SHA-256(prev|ts|user|role|action|status|ip); no HMAC key, no external anchor",
+      "result": "NOTE"
+    },
+    {
+      "id": "MISC-06",
+      "name": "Residual: no formal penetration test, no PIPL legal review, no certification; the mock bank connection and the AI/news components are simulated or optional",
+      "request": "scope statement",
+      "expected": "informational",
+      "actual": "this tool is a self-assessment",
+      "result": "NOTE"
+    },
+    {
+      "id": "ENV-01",
+      "name": "Self-test did not modify project data files (size+mtime of data/app.db and data/lessons_state.json unchanged; files not opened)",
+      "request": "os.stat before/after",
+      "expected": "identical",
+      "actual": "before={'C:\\\\Users\\\\eldiiar\\\\Desktop\\\\track\\\\data\\\\app.db': [184320, 1792440275862994200], 'C:\\\\Users\\\\eldiiar\\\\Desktop\\\\track\\\\data\\\\lessons_state.json': [14, 1792436992985123400]} after={'C:\\\\Users\\\\eldiiar\\\\Desktop\\\\track\\\\data\\\\app.db': [184320, 1792440275862994200], 'C:\\\\Users\\\\eldiiar\\\\Desktop\\\\track\\\\data\\\\lessons_state.json': [14, 1792436992985123400]}",
+      "result": "PASS"
+    },
+    {
+      "id": "ENV-02",
+      "name": "Unhandled exceptions inside request handlers during the whole run (a thread died and the connection was dropped)",
+      "request": "RecordingServer.handle_error",
+      "expected": "informational (an unhandled handler exception would also surface as a FAIL above)",
+      "actual": "0: []",
+      "result": "NOTE"
+    }
+  ],
+  "report_sha256": "e669948913c1025a107f8eaa3dec722fcbdac6b424e32df4add76427e8fd4393",
+  "sha256_method": "SHA-256 over json.dumps(report without report_sha256/sha256_method, sort_keys=True, ensure_ascii=False, separators=(',',':')) UTF-8"
+}

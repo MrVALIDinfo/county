@@ -1,0 +1,61 @@
+kind,text,merchant,note,type,direction,amount,expected_category,expected_counterparty,expected_mode,expected_merchant
+stmt,,瑞幸咖啡,生椰拿铁,商户消费,out,18,food_drink,merchant,silent,
+stmt,,海底捞,火锅,商户消费,out,286,food_drink,merchant,digest,
+stmt,,美团,外卖订单,商户消费,out,42,food_drink,merchant,silent,
+stmt,,老乡鸡,午餐,商户消费,out,31,food_drink,merchant,digest,
+stmt,,蜜雪冰城,柠檬水,商户消费,out,8,food_drink,merchant,digest,
+stmt,,滴滴出行,快车,商户消费,out,23,transport,merchant,silent,
+stmt,,同仁堂药店,感冒药,商户消费,out,67,health,merchant,digest,
+stmt,,盒马鲜生,生鲜,商户消费,out,128,groceries,merchant,silent,
+stmt,,山姆会员店,日用品,商户消费,out,355,groceries,merchant,digest,
+stmt,,中石化加油站,加油,商户消费,out,300,transport,merchant,digest,
+stmt,,小红书商城,护肤品,商户消费,out,189,shopping,merchant,digest,
+stmt,,滴滴青桔,骑行,商户消费,out,3,transport,merchant,silent,
+stmt,,老乡鸡,晚餐,商户消费,out,29,food_drink,merchant,silent,
+stmt,,蜜雪冰城,奶茶,商户消费,out,10,food_drink,merchant,silent,
+stmt,,海底捞,火锅,商户消费,out,312,food_drink,merchant,silent,
+stmt,,美团,外卖订单,商户消费,out,36,food_drink,merchant,silent,
+stmt,,淘宝,收纳盒,商户消费,out,59,shopping,merchant,silent,
+stmt,,京东,耳机,商户消费,out,399,shopping,merchant,silent,
+stmt,,中国移动,话费,商户消费,out,50,subscriptions,merchant,silent,
+stmt,,爱奇艺,会员,商户消费,out,25,subscriptions,merchant,silent,
+stmt,,链家,房租,商户消费,out,3200,housing,merchant,silent,
+stmt,,全家,饭团,商户消费,out,12.5,groceries,merchant,silent,
+stmt,,地铁,乘车,商户消费,out,4,transport,merchant,silent,
+stmt,,同仁堂药店,维生素,商户消费,out,98,health,merchant,silent,
+stmt,,山姆会员店,日用品,商户消费,out,260,groceries,merchant,silent,
+stmt,,中石化加油站,加油,商户消费,out,280,transport,merchant,silent,
+stmt,,张伟,转账,转账,out,200,transfers,person,ask,
+stmt,,李娜,红包,红包,out,88,transfers,person,ask,
+stmt,,零钱,提现,零钱提现,out,500,transfers,self,silent,
+stmt,,信用卡,还款,信用卡还款,out,1200,transfers,self,silent,
+stmt,,公司,工资,工资发放,in,9000,income,merchant,silent,
+stmt,,星巴克,拿铁,商户消费,out,38,food_drink,merchant,silent,
+stmt,,麦当劳,套餐,商户消费,out,35,food_drink,merchant,silent,
+stmt,,优衣库,外套,商户消费,out,299,shopping,merchant,silent,
+stmt,,美团,电影票,商户消费,out,45,entertainment,merchant,digest,
+stmt,,拼多多,水果,商户消费,out,45,groceries,merchant,digest,
+stmt,,好利来,生日蛋糕,商户消费,out,88,food_drink,merchant,digest,
+stmt,,屈臣氏,洗发水,商户消费,out,79,shopping,merchant,digest,
+stmt,,叮咚买菜,蔬菜,商户消费,out,66,groceries,merchant,silent,
+stmt,,肯德基,汉堡,商户消费,out,41,food_drink,merchant,silent,
+stmt,,哈啰,单车,商户消费,out,2,transport,merchant,silent,
+stmt,,喜茶,多肉葡萄,商户消费,out,29,food_drink,merchant,silent,
+stmt,,网易云音乐,会员,商户消费,out,15,subscriptions,merchant,silent,
+stmt,,万达影城,电影票,商户消费,out,58,entertainment,merchant,silent,
+chat,瑞幸 18,,,,out,18,food_drink,merchant,silent,Luckin
+chat,午饭 35,,,,out,35,food_drink,merchant,silent,午饭
+chat,transfer to Tony 100,,,,out,100,transfers,person,ask,Tony
+chat,"1,000 rent",,,,out,1000,housing,merchant,silent,Rent
+chat,7-eleven 20,,,,out,20,groceries,merchant,silent,7-Eleven
+chat,打车 25,,,,out,25,transport,merchant,silent,
+chat,coffee 22,,,,out,22,food_drink,merchant,silent,
+chat,转给小王 200,,,,out,200,transfers,person,ask,小王
+chat,海底捞 260,,,,out,260,food_drink,merchant,silent,海底捞
+chat,老乡鸡 28元,,,,out,28,food_drink,merchant,silent,老乡鸡
+chat,蜜雪冰城 9块,,,,out,9,food_drink,merchant,silent,蜜雪冰城
+chat,工资 9000,,,,in,9000,income,merchant,silent,工资
+chat,uber 30,,,,out,30,transport,merchant,digest,uber
+chat,lunch 12.5,,,,out,12.5,food_drink,merchant,silent,
+chat,买了本书 45,,,,out,45,shopping,merchant,digest,
+stmt,,小米之家,充电宝,商户消费,out,129,shopping,merchant,digest,

@@ -1,0 +1,9 @@
+{
+  "name": "County",
+  "short_name": "County",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E8F1F6",
+  "theme_color": "#12C6A8",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

@@ -1,0 +1,90 @@
+{
+  "generated_utc": "2026-10-19T20:12:24.054+00:00",
+  "note": "Redacted summary of the SIMULATED account after /api/demo. Counts and balances only; no merchant names, no raw bank strings.",
+  "persona": "Lin Xiaoyu (synthetic)",
+  "transactions_total": 371,
+  "by_status": {
+    "auto": 367,
+    "pending": 4
+  },
+  "by_mode": {
+    "ask": 2,
+    "digest": 2,
+    "silent": 367
+  },
+  "by_category": {
+    "entertainment": 7,
+    "food_drink": 209,
+    "groceries": 45,
+    "health": 3,
+    "housing": 3,
+    "income": 3,
+    "other": 2,
+    "shopping": 54,
+    "subscriptions": 12,
+    "transfers": 2,
+    "transport": 31
+  },
+  "by_direction": {
+    "in": 5,
+    "out": 366
+  },
+  "by_source": {
+    "csv": 371
+  },
+  "date_range": [
+    "2026-07-23",
+    "2026-10-20"
+  ],
+  "merchant_memory_entries": 19,
+  "profile": {
+    "payday_day": 10,
+    "income_cents": 1500000,
+    "fixed_expenses": [
+      {
+        "name": "rent",
+        "amount_cents": 320000,
+        "day": 1
+      }
+    ],
+    "currency": "CNY"
+  },
+  "dashboard": {
+    "today": "2026-10-20",
+    "income_cents": 1500000,
+    "spent_cents": 271400,
+    "balance_cents": 1228600,
+    "free_cents": 499296,
+    "allowance_cents": 23776,
+    "avg_flex_cents": 24571,
+    "status": "tight",
+    "savings_rate": 0.295,
+    "pending": {
+      "digest": 2,
+      "ask": 2
+    }
+  },
+  "goals": [
+    {
+      "name": "MacBook Air",
+      "target_cents": 800000,
+      "saved_cents": 650000,
+      "deadline": "2026-12-19",
+      "status": "on_track"
+    },
+    {
+      "name": "Japan trip",
+      "target_cents": 1600000,
+      "saved_cents": 1088000,
+      "deadline": "2027-01-18",
+      "status": "on_track"
+    },
+    {
+      "name": "Emergency fund",
+      "target_cents": 3000000,
+      "saved_cents": 1200000,
+      "deadline": "2027-09-15",
+      "status": "on_track"
+    }
+  ]
+}

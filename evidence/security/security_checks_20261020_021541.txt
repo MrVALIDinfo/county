@@ -1,0 +1,355 @@
+Finance Copilot security self-test  2026-10-19T20:15:06+00:00  Python 3.12.10  Windows-10-10.0.19045-SP0
+
+ID       RESULT CHECK  ->  ACTUAL
+--------------------------------------------------------------------------------------------------------------
+SETUP-01 PASS   Fresh install: status is public and reports 'not configured'; no defau  ->  200 {'configured': False, 'authenticated': False, 'username': None, 'role': None, 'stepup_until': None, 'conse
+SETUP-02 PASS   Before the owner exists, data endpoints are still 401 (no open first-r  ->  401 unauthenticated
+SETUP-03aPASS   Password policy on setup: short rejected  ->  400 password_too_short users=0
+SETUP-03bPASS   Password policy on setup: one char rejected  ->  400 password_one_character users=0
+SETUP-03cPASS   Password policy on setup: equals username rejected  ->  400 password_equals_username users=0
+SETUP-03dPASS   Password policy on setup: too long rejected  ->  400 password_too_long users=0
+SETUP-04aPASS   Setup with invalid username / non-string input -> 400, no user, no cra  ->  400 username_invalid users=0
+SETUP-04bPASS   Setup with invalid username / non-string input -> 400, no user, no cra  ->  400 username_invalid users=0
+SETUP-04cPASS   Setup with invalid username / non-string input -> 400, no user, no cra  ->  400 username_invalid users=0
+SETUP-04dPASS   Setup with invalid username / non-string input -> 400, no user, no cra  ->  400 password_invalid users=0
+SETUP-05 PASS   First-run setup creates the single owner and signs in  ->  200 {'ok': True, 'username': 'selftest_owner', 'role': 'owner', 'stepup_until': None} users=1
+COOKIE-01PASS   Session cookie flags: HttpOnly, SameSite=Strict, Path=/, Max-Age = 12   ->  fc_session=<token>; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200
+COOKIE-02PASS   Session token: >= 256 bits of randomness, never echoed in a JSON body  ->  len=43 in_body=False
+SETUP-06 PASS   Setup works only once (a second owner cannot be created, even by the l  ->  409 already_configured users=1
+SETUP-07 PASS   Status for the signed-in owner: role, no step-up yet, idle timeout 180  ->  {'configured': True, 'authenticated': True, 'username': 'selftest_owner', 'role': 'owner', 'stepup_until': Non
+COOKIE-03PASS   Garbage / forged cookie -> 401 and the browser is told to drop it  ->  401 set-cookie=['fc_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0']
+COOKIE-04PASS   A valid token in a URL parameter or header is NOT a session (cookie on  ->  401
+COOKIE-05PASS   Logout deletes the server-side session; replaying the old cookie fails  ->  logout=200 cleared=True replay=401
+COOKIE-06PASS   Login rotates the token (anti session-fixation): the presented old tok  ->  same=False old=401 new=200
+POL-01   PASS   Every route implemented in server._route / ext_routes has an entry in   ->  policy entries=36 implemented paths=36 missing=[]
+POL-02   NOTE   Policy table inventory (informational)  ->  {'OWNER': 2, 'PUBLIC': 3, 'READ': 9, 'SENSITIVE': 5, 'SESSION': 2, 'WRITE': 15}
+POL-03   PASS   Consent-gated endpoints are all POST routes of the WRITE/SENSITIVE tie  ->  ['/api/chat', '/api/demo', '/api/import', '/api/scan']
+AUTHN-01 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-02 PASS   Unauthenticated request to non-public route is rejected (OWNER)  ->  401 unauthenticated
+AUTHN-03 PASS   Unauthenticated request to non-public route is rejected (SESSION)  ->  401 unauthenticated
+AUTHN-04 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-05 PASS   Unauthenticated request to non-public route is rejected (SESSION)  ->  401 unauthenticated
+AUTHN-06 PASS   Unauthenticated request to non-public route is rejected (OWNER)  ->  401 unauthenticated
+AUTHN-07 PASS   Unauthenticated request to non-public route is rejected (SENSITIVE)  ->  401 unauthenticated
+AUTHN-08 PASS   Unauthenticated request to non-public route is rejected (SENSITIVE)  ->  401 unauthenticated
+AUTHN-09 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-10 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-11 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-12 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-13 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-14 PASS   Unauthenticated request to non-public route is rejected (SENSITIVE)  ->  401 unauthenticated
+AUTHN-15 PASS   Unauthenticated request to non-public route is rejected (SENSITIVE)  ->  401 unauthenticated
+AUTHN-16 PASS   Unauthenticated request to non-public route is rejected (SENSITIVE)  ->  401 unauthenticated
+AUTHN-17 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-18 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-19 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-20 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-21 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-22 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-23 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-24 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-25 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-26 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-27 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-28 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-29 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-30 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-31 PASS   Unauthenticated request to non-public route is rejected (WRITE)  ->  401 unauthenticated
+AUTHN-32 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-33 PASS   Unauthenticated request to non-public route is rejected (READ)  ->  401 unauthenticated
+AUTHN-34 PASS   Unknown /api path without a session -> 401 (default tier is the strict  ->  401
+AUTHN-35 PASS   Unknown /api path without a session -> 401 (default tier is the strict  ->  401
+AUTHN-PUBPASS   The three PUBLIC API routes are reachable without a session (and nothi  ->  200 / 401 invalid_credentials / 409 already_configured
+STEP-01  PASS   SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothi  ->  403 stepup_required
+STEP-02  PASS   SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothi  ->  403 stepup_required
+STEP-03  PASS   SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothi  ->  403 stepup_required
+STEP-04  PASS   SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothi  ->  403 stepup_required
+STEP-05  PASS   SENSITIVE route as owner WITHOUT step-up -> 403 stepup_required, nothi  ->  403 stepup_required
+STEP-90  PASS   Nothing changed by the refused SENSITIVE calls  ->  before=(1, 0) after=(1, 0)
+STEP-91  PASS   Step-up with a wrong password is refused and opens no window  ->  403 invalid_password stepup_until=None
+STEP-92  PASS   Correct password opens a 5-minute step-up window and rotates the sessi  ->  200 until-now=300s rotated=True
+STEP-93  PASS   The pre-step-up token is dead after rotation  ->  False
+STEP-94  PASS   Step-up does not extend the absolute session lifetime (created_at carr  ->  before=1792440906.3896744 after=1792440906.3896744
+STEP-95  PASS   With a fresh step-up the SENSITIVE route is reachable  ->  200
+STEP-96  PASS   Step-up expires after 300 s (clock offset: 299 s still valid, 301 s re  ->  200, 403 stepup_required
+STEP-97  PASS   Constants as documented: STEPUP_TTL=300, IDLE_TIMEOUT=1800, ABS_LIFETI  ->  300 / 1800 / 43200
+CONS-01  PASS   Ingestion without recorded consent -> 428 consent_required (server-sid  ->  428 consent_required
+CONS-02  PASS   Ingestion without recorded consent -> 428 consent_required (server-sid  ->  428 consent_required
+CONS-03  PASS   Ingestion without recorded consent -> 428 consent_required (server-sid  ->  428 consent_required
+CONS-04  PASS   Ingestion without recorded consent -> 428 consent_required (server-sid  ->  428 consent_required
+CONS-05  PASS   Refused ingestion stored nothing  ->  0 -> 0
+CONS-06  PASS   Reads do not need consent  ->  200
+CONS-07  PASS   Consent needs agree === true (boolean) and a version  ->  400 agree_required, 400 agree_required, 400 version_required
+CONS-08  PASS   Consent recorded with version and UTC timestamp; status endpoint repor  ->  200 row=[('v1', '2026-10-19T20:15:08Z')] status.consent={'version': 'v1', 'at': '2026-10-19T20:15:08Z'}
+CONS-09  PASS   After consent the same ingestion call succeeds  ->  200 kind=digest
+CONS-10  PASS   Withdrawing consent re-closes the gate immediately  ->  200, 428 consent_required
+CONS-11  NOTE   Residual: the consent record is ONE global row per installation (not p  ->  consent(id CHECK(id=1), version, at)
+PT-00    PASS   Control: index served  ->  200 text/html; charset=utf-8
+PT-00b   PASS   Control: frontend asset served  ->  200
+PT-01    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-02    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-03    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-04    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-05    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-06    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-07    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-08    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-09    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-10    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-11    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-12    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-13    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-14    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-15    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-16    PASS   Static path traversal blocked  ->  404 leaked=False 
+PT-17    PASS   Unknown API route returns JSON 404 (owner with step-up)  ->  404 application/json; charset=utf-8
+HDR-01   PASS   Security headers present, no CORS header  ->  status=200 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security
+HDR-02   PASS   Security headers present, no CORS header  ->  status=200 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security
+HDR-03   PASS   Security headers present, no CORS header  ->  status=200 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security
+HDR-04   PASS   Security headers present, no CORS header  ->  status=404 x-content-type-options=nosniff, x-frame-options=DENY, referrer-policy=no-referrer, content-security
+HDR-05   PASS   API responses are not cacheable  ->  no-store
+HDR-06   PASS   index.html has no inline script or inline event handlers (CSP-compatib  ->  inline=0 on-attrs=0
+HDR-07   NOTE   Residual: CSP allows style-src 'unsafe-inline'; no HSTS on the default  ->  style-src unsafe-inline=True; strict-transport-security absent=True
+HDR-08   PASS   Permissions-Policy limits camera/microphone to self and disables geolo  ->  status=200 permissions-policy=camera=(self), microphone=(self), geolocation=()
+HDR-09   PASS   Permissions-Policy limits camera/microphone to self and disables geolo  ->  status=200 permissions-policy=camera=(self), microphone=(self), geolocation=()
+HDR-10   PASS   Permissions-Policy limits camera/microphone to self and disables geolo  ->  status=401 permissions-policy=camera=(self), microphone=(self), geolocation=()
+HDR-11   PASS   Cache-Control: no-store on API replies (data, 401 and auth replies)  ->  status=200 cache-control=no-store
+HDR-12   PASS   Cache-Control: no-store on API replies (data, 401 and auth replies)  ->  status=401 cache-control=no-store
+HDR-13   PASS   Cache-Control: no-store on API replies (data, 401 and auth replies)  ->  status=401 cache-control=no-store
+CT-01    PASS   POST without application/json is rejected  ->  415
+CT-02    PASS   POST without application/json is rejected  ->  415
+CT-03    PASS   POST without application/json is rejected  ->  415
+CT-04    PASS   POST without application/json is rejected  ->  415
+CT-05    PASS   Cross-site-style simple POST cannot trigger delete-all  ->  415 tx before=371 after=371
+CT-06    PASS   application/json with charset accepted  ->  200
+CT-07    PASS   OPTIONS not implemented (no CORS preflight success)  ->  501 acao=False
+CT-08    PASS   PUT not implemented (no CORS preflight success)  ->  501 acao=False
+CT-09    PASS   DELETE not implemented (no CORS preflight success)  ->  501 acao=False
+CT-10    NOTE   Known quirk: content-type check is a prefix match (e.g. application/js  ->  startswith('application/json')
+HOST-01-GaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-01-GsPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-01-PaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-02-GaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-02-GsPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-02-PaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-03-GaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-03-GsPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-03-PaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-04-GaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-04-GsPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-04-PaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-05-GaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-05-GsPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-05-PaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-06-GaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-06-GsPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-06-PaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-07-GaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-07-GsPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-07-PaPASS   Wrong Host header rejected (DNS-rebinding guard)  ->  403
+HOST-OK1 PASS   Allowed Host headers accepted  ->  200
+HOST-OK2 PASS   Allowed Host headers accepted  ->  200
+HOST-OK3 PASS   Allowed Host headers accepted  ->  200
+HOST-OK4 PASS   Allowed Host headers accepted  ->  200
+BODY-01  PASS   Malformed Content-Length handled without crash  ->  200  alive_after=True
+BODY-02  PASS   Malformed Content-Length handled without crash  ->  200  alive_after=True
+BODY-03  PASS   Malformed Content-Length handled without crash  ->  413  alive_after=True
+BODY-04  PASS   Malformed Content-Length handled without crash  ->  413  alive_after=True
+BODY-05  PASS   Malformed Content-Length handled without crash  ->  200  alive_after=True
+BODY-06  PASS   Malformed Content-Length handled without crash  ->  200  alive_after=True
+BODY-07  PASS   Non-object / invalid JSON body handled  ->  400  body={"error": "invalid_json"}
+BODY-08  PASS   Non-object / invalid JSON body handled  ->  400  body={"error": "invalid_json"}
+BODY-09  PASS   Non-object / invalid JSON body handled  ->  400  body={"error": "invalid_json"}
+BODY-10  PASS   Non-object / invalid JSON body handled  ->  400  body={"error": "invalid_json"}
+BODY-11  PASS   Non-object / invalid JSON body handled  ->  400  body={"error": "invalid_json"}
+BODY-12  PASS   Non-object / invalid JSON body handled  ->  400  body={"error": "invalid_json"}
+BODY-13  PASS   Array body on a route that needs fields -> 400  ->  400
+BODY-14  PASS   FIXED (was FAIL): deeply nested JSON array -> clean 400  ->  400  {"error": "invalid_json"} alive_after=True
+BODY-14b PASS   FIXED: deeply nested JSON object (parser RecursionError) -> clean 400  ->  400  {"error": "invalid_json"} alive_after=True
+BODY-15  PASS   Integer beyond SQLite range -> 400  ->  400
+BODY-16  PASS   Non-numeric id -> 400  ->  400
+BODY-17  PASS   Category outside whitelist (existing transaction id) -> 400  ->  400
+NUM-01   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-02   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-03   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-04   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-05   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-06   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-07   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-08   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 0, 'duplicates': 0, 'skipped': 1, 'silent': 0, 'digest': 0, 'ask': 0} rows
+NUM-09   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 1, 'duplicates': 0, 'skipped': 0, 'silent': 0, 'digest': 1, 'ask': 0} rows
+NUM-10   PASS   CSV import amount edge case  ->  200  report={'read': 1, 'imported': 1, 'duplicates': 0, 'skipped': 0, 'silent': 0, 'digest': 1, 'ask': 0} rows
+CHAT-01  PASS   Chat amount edge case  ->  200 kind=unknown
+CHAT-02  PASS   Chat amount edge case  ->  200 kind=unknown
+CHAT-03  PASS   Chat amount edge case  ->  200 kind=unknown
+CHAT-04  PASS   Chat amount edge case  ->  200 kind=unknown
+CHAT-05  PASS   Chat amount edge case  ->  200 kind=unknown
+CHAT-06  PASS   Chat amount edge case  ->  200 kind=unknown
+GOAL-01  PASS   Goal amount edge case rejected  ->  400 
+GOAL-02  PASS   Goal amount edge case rejected  ->  400 
+GOAL-03  PASS   Goal amount edge case rejected  ->  400 
+GOAL-04  PASS   Goal amount edge case rejected  ->  400 
+GOAL-05  PASS   Goal values clamped (name<=60, target<=1e12, saved>=0)  ->  200 row=[('capcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcapcap', 1000000000000, 0)]
+GOAL-06  PASS   Deposit clamped  ->  200 saved=[(1000000000000,)]
+PROF-01  PASS   Profile values clamped  ->  200 [(31, 0)]
+FIX-01   PASS   FIXED (was FAIL NUM-07): decimal-overflow amount 1e999999999 in CSV im  ->  200  {"read": 1, "imported": 0, "duplicates": 0, "skipped": 1, "silent": 0, "digest": 0, "ask": rows_added=0 a
+FIX-03   PASS   Overflowing number on a JSON API field (float inf -> OverflowError) is  ->  400 bad_input alive=True
+FIX-02   PASS   FIXED (was FAIL BODY-14): 200 000-deep JSON array -> clean 400 (see BO  ->  400  alive=True
+SQL-01   PASS   Odd merchant strings round-trip verbatim through parameterised INSERT   ->  200 report={'read': 7, 'imported': 7, 'duplicates': 0, 'skipped': 0, 'silent': 1, 'digest': 6, 'ask': 0} verba
+SQL-02   PASS   No table dropped, goals not modified by injection strings  ->  tables=['audit', 'consent', 'goals', 'login_attempts', 'merchant_memory', 'profile', 'sessions', 'sqlite_seque
+SQL-03   PASS   Filter q with ' OR '1'='1 behaves as literal text  ->  1 of 381 rows; merchants=["' OR '1'='1"]
+SQL-04   PASS   Filter category with injection returns no rows  ->  0
+SQL-05   PASS   Filter year with injection rejected (int cast)  ->  400
+RANGE-01 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-02 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-03 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-04 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-05 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-06 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-07 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-08 PASS   Date filter out of range rejected (year 1900-2200, month 1-12, day 1-3  ->  400
+RANGE-09 PASS   Control: in-range date filter accepted  ->  200
+SQL-06   PASS   Filter direction is whitelisted (unknown value ignored, not interpolat  ->  200 items=381
+SQL-07   PASS   Stored injection string is retrievable by search (round trip)  ->  ["Robert'); DROP TABLE transactions;--"]
+SQL-08   PASS   SQL text in chat message is data, not code  ->  200 kind=silent goals_table=True
+SQL-09   PASS   Very long search term handled (truncated to 40)  ->  200
+SQL-10   NOTE   Known minor: '_' in q acts as a LIKE wildcard ('%' is stripped)  ->  no ESCAPE clause; harmless (read-only filter on own data)
+XSS-01   PASS   XSS payload merchant via CSV stored verbatim (output-encoding is the d  ->  200 stored=['<img src=x onerror=alert(1)>', '<script>alert(1)</script>', '"><svg/onload=alert(1)>']
+XSS-02   PASS   XSS payload via chat accepted as text only  ->  200 ct=application/json; charset=utf-8 merchant=<img src=x onerror=alert(2)>
+XSS-03   PASS   API returns JSON only with nosniff (browser will not render it as HTML  ->  ct=application/json; charset=utf-8 nosniff=nosniff has_payload=True
+XSS-04   PASS   Export is JSON (attachment-style download is created client-side)  ->  application/json; charset=utf-8
+FE-01    PASS   esc() escapes & < > " '  ->  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#3
+FE-02    NOTE   HTML sinks inventory  ->  {'app.js': 21, 'auth.js': 10, 'bench.js': 2, 'insights.js': 1, 'invest2.js': 1, 'trust.js': 1, 'voicedemo.js':
+FE-03    PASS   Interpolations of user-controlled fields into HTML are wrapped in esc(  ->  flagged=1 unresolved=[]
+FE-04    PASS   avatarURL() allow-list regex accepts only png/jpeg/webp base64 data UR  ->  good=True hostile_accepted=[False, False, False, False, False, False]
+FE-05    PASS   Consent gate (client-side) wraps CSV import, photo scan, scan FAB and   ->  call sites=4 gated=['csv-file', 'photo', 'scan-fab', 'demo']
+FE-06    PASS   Consent is enforced server-side for all ingestion endpoints incl. free  ->  ['/api/chat', '/api/demo', '/api/import', '/api/scan']; client sendChat calls consentOk=False
+FE-12    PASS   auth.js keeps no password/token in browser storage (session = HttpOnly  ->  direct storage calls=0; store.set keys=['lang']
+FE-13    PASS   Client handles 401 (re-login), 403 stepup_required (password modal) an  ->  401=True stepup=True 428=True
+FE-07    PASS   Delete-all asks for confirm() and then clears local profile keys  ->  confirm=True api=True clears=['nickname', 'name', 'email', 'phone', 'avatar']
+FE-08    PASS   Delete-all also clears the cached consent timestamp (consent_v1) in th  ->  consent_v1 cleared=True
+FE-09    PASS   Export builds a client-side Blob download from GET /export; withdraw c  ->  export=True withdraw_confirm=True
+FE-10    PASS   No third-party CDN/font/script references in index.html, styles.css, m  ->  []
+FE-11    PASS   LAN token kept in sessionStorage (tab-scoped) and stripped from the ad  ->  True
+SCAN-01  PASS   Invalid media_type normalised before use  ->  200 kind=silent media_type_seen=image/jpeg
+SCAN-02  PASS   Oversize image (~5.1 MB decoded) rejected  ->  200 {'kind': 'error', 'reason': 'too_large'}
+SCAN-03  PASS   Scan rate limit (3 s, process-wide) engages on a rapid second call  ->  first=silent second={'kind': 'error', 'reason': 'rate'}
+SCAN-04  PASS   No API key configured -> flagged DEMO result, no outbound call  ->  True
+SCAN-05  PASS   Injected model output: direction forced to 'out', confidence capped at  ->  200 row(direction,category,confidence,status,mode)=[('out', 'income', 0.8, 'pending', 'digest')]
+SCAN-06  PASS   API key goes only to api.anthropic.com in a header and never appears i  ->  url=https://api.anthropic.com/v1/messages header_present=True in_response=False
+SCAN-07  PASS   The model request contains only the image and the fixed prompt (no led  ->  parts=['image', 'text'] keys=['max_tokens', 'messages', 'model']
+SCAN-08  PASS   Category outside whitelist -> 'other'; non-numeric confidence -> defau  ->  200 [('other', 0.6)]
+SCAN-09  PASS   Overflow amount in model output handled  ->  200  {'kind': 'error', 'reason': 'unreadable'}
+SCAN-10  PASS   Non-JSON model output handled  ->  200 {'kind': 'error', 'reason': 'unreadable'}
+SCAN-11  NOTE   Known gap: a known merchant name (>=2 confirmations) is auto-recorded   ->  pending status is guaranteed only for unknown merchants
+EXP-01   PASS   Export excludes the raw bank row and the bank transaction number  ->  in_db=yes leaked=[]
+EXP-02   PASS   Export is an explicit allow-list of fields  ->  ['amount_cents', 'category', 'confidence', 'counterparty_type', 'currency', 'date', 'direction', 'id', 'mercha
+EXP-03   PASS   Export structure (profile, goals, transactions, merchant_memory) and t  ->  ['exported_at', 'goals', 'merchant_memory', 'note', 'profile', 'transactions']
+EXP-04   PASS   Normal API responses (state, history) never contain the raw bank row  ->  []
+EXP-05   NOTE   Known gap: 'raw' (first 300 chars of each imported CSV row) is stored   ->  raw stored='2026-07-05,payment,Export Probe Shop,RAWNOTE-SECRET-4455 BAN'
+NEWS-01  PASS   Feed list is a fixed constant of http(s) URLs  ->  n=7 schemes=['http', 'https']
+NEWS-02  PASS   Hostile query parameters do not change what is fetched  ->  200 fetched_outside_allowlist=[] live=False
+NEWS-03  PASS   With all feeds unreachable the endpoint falls back to labelled samples  ->  [(True, ''), (True, '')]
+NEWS-04  PASS   POST /api/news/refresh ignores any URL in the body  ->  200 fetched_outside=[]
+NEWS-05  PASS   Only http(s) links survive feed parsing (javascript:, data:, file:, ft  ->  kept=['http://example.com/a', 'https://example.com/b', 'https://example.com/c']
+NEWS-06  PASS   HTML tags are stripped from feed titles  ->  ['Tagged title x']
+NEWS-07  PASS   Atom href links filtered the same way  ->  ['https://ok.example/x']
+NEWS-08  PASS   DOCTYPE / entity declarations (XXE, billion laughs) rejected before pa  ->  rejected: doctype
+NEWS-09  PASS   Redirects to non-http(s) schemes are refused  ->  {'file:///etc/passwd': False, 'ftp://x/y': False, 'gopher://x': False, 'https://ok.example/rss': True, 'http:/
+NEWS-10  NOTE   Known gap (SSRF scope): a redirect from an allow-listed feed to http:/  ->  redirect to http://127.0.0.1:8000/ followed=True; response body is parsed as XML only, never returned raw, cap
+LAN-01   PASS   --lan: API without X-Token -> 401  ->  401
+LAN-02   PASS   --lan: wrong token -> 401  ->  401
+LAN-03   PASS   --lan: prefix of the token -> 401  ->  401
+LAN-04   PASS   --lan: correct token -> 200  ->  200
+LAN-05   PASS   --lan: POST without token -> 401 (before any state change)  ->  401
+LAN-06   PASS   --lan: delete-all without token -> 401 and data intact  ->  401 rows=391
+LAN-07   PASS   --lan: export without token -> 401  ->  401
+LAN-08   PASS   --lan: LAN IP Host accepted only in LAN mode  ->  200
+LAN-09   PASS   --lan: arbitrary Host still rejected even with a valid token  ->  403
+LAN-10   NOTE   Known by design: static shell (no data) is served without the token  ->  200
+LAN-11   PASS   --lan: non-ASCII token header does not crash comparison  ->  401 
+LAN-12   NOTE   Token strength and transport (static review)  ->  8 random bytes (~64 bits), constant-time compare, per-run; the token is only an extra network gate: a valid ac
+LAN-13   PASS   Default (local) mode: LAN IP Host rejected  ->  403
+TIER-00  PASS   Owner (with step-up) creates a guest; weak password and case-variant d  ->  400 password_too_short; 200 viewer; 409 username_taken
+TIER-01  PASS   Viewer can use every READ-tier route  ->  {'POST /api/ask': 200, 'GET /api/benchmark': 200, 'GET /api/insights': 200, 'GET /api/lessons': 200, 'GET /api
+TIER-02  PASS   Viewer is refused on every WRITE-tier route (403 forbidden)  ->  {'POST /api/auth/password': '403 forbidden', 'POST /api/chat': '403 forbidden', 'POST /api/confirm': '403 forb
+TIER-03  PASS   No state changed by the viewer's refused WRITE calls (tx, goals, conse  ->  equal=True
+TIER-04  PASS   Viewer is refused on every SENSITIVE route (403 forbidden) even after   ->  {'POST /api/auth/users/delete': '403 forbidden', 'POST /api/auth/viewer': '403 forbidden', 'POST /api/delete-a
+TIER-05  PASS   Viewer cannot read the audit log or the user list (OWNER tier)  ->  {'GET /api/audit': '403 forbidden', 'GET /api/auth/users': '403 forbidden'}
+TIER-06  PASS   Owner account cannot be deleted through the API (even by the owner wit  ->  409 cannot_delete_owner users=2
+TIER-07  PASS   Deleting a guest kills its live session immediately  ->  200 -> 200 -> 401
+TIER-08  PASS   User list exposes no password hash, salt or token  ->  ['created_at', 'disabled', 'role', 'username']
+TIER-09  PASS   Viewer can sign out (SESSION tier); the cookie is then dead  ->  200 then 401
+TIER-10  NOTE   Residual: the guest role reads the owner's single dataset (state, tran  ->  ledger tables have no user column
+LOCK-01  PASS   Uniform error: wrong password for a real user and any password for an   ->  401 {"error": "invalid_credentials"} | 401 {"error": "invalid_credentials"}
+LOCK-02  PASS   5th consecutive failure locks the account/IP pair: 429 with error=lock  ->  [401, 401, 401, 401, 429] body={'error': 'locked', 'retry_after': 60}
+LOCK-03  PASS   The CORRECT password is also refused while locked (no lock bypass)  ->  429 locked cookie_issued=False
+LOCK-04  PASS   Unknown usernames lock the same way (no user enumeration through locko  ->  [401, 401, 401, 401, 429]
+LOCK-05  PASS   Lockout is per (IP, username): another account is unaffected  ->  200
+LOCK-06  PASS   Back-off doubles for each further failure (6th failure -> ~120 s)  ->  429 {'error': 'locked', 'retry_after': 120}
+LOCK-07  PASS   Lock expires after retry_after; a correct login then succeeds and clea  ->  200 rows_left=0
+LOCK-08  PASS   Oversized / wrongly typed / missing credentials -> 401, never 500  ->  [401, 401, 401, 401]
+LOCK-09  NOTE   Residual: lock key is (IP, username): an attacker rotating usernames g  ->  LOCK_AFTER=5 LOCK_BASE=60s LOCK_MAX=900s
+ORG-01   PASS   Cross-origin POST with a valid session cookie is rejected by the Origi  ->  403 bad_origin rows_added=0
+ORG-02   PASS   Cross-origin POST with a valid session cookie is rejected by the Origi  ->  403 bad_origin rows_added=0
+ORG-03   PASS   Cross-origin POST with a valid session cookie is rejected by the Origi  ->  403 bad_origin rows_added=0
+ORG-04   PASS   Cross-origin POST with a valid session cookie is rejected by the Origi  ->  403 bad_origin rows_added=0
+ORG-05   PASS   CSRF scenario: delete-all from a foreign origin with a valid session A  ->  403 bad_origin tx=391
+ORG-06   PASS   Same-origin POST (Origin = Host) is accepted  ->  200
+ORG-07   PASS   The Origin check runs before the session lookup (foreign origin -> 403  ->  403
+ORG-08   NOTE   Second layer: SameSite=Strict cookie (COOKIE-01) and application/json-  ->  defence in depth
+AUD-01   PASS   Audit log (owner) lists events and reports the chain as intact  ->  200 entries=145 chain_ok=True actions=['GET /api/does-not-exist', 'GET /api/export', 'GET /api/export [denied]
+AUD-02   PASS   Independent re-computation of the chain in this script (SHA-256 over p  ->  rows=145 match=True genesis_ok=True
+AUD-03   PASS   Editing one audit row is detected (chain_ok=false, first_broken_id = t  ->  tampered: ok=False broken=73; restored: ok=True
+AUD-04   PASS   Deleting an audit row is detected as well (the next row no longer link  ->  deleted: ok=False broken=74; reinserted: ok=True
+AUD-05   PASS   The audit log never contains passwords or session tokens (only who/wha  ->  []
+AUD-06   PASS   Denials, failed/locked logins, consent refusals and failed step-ups ar  ->  {'viewer denial': 20, 'failed login': 14, 'locked login': 4, 'consent 428': 5, 'step-up required': 6, 'failed 
+AUD-07   PASS   Plain reads are not audited (log stays about security-relevant changes  ->  145 -> 145
+AUD-08   PASS   Export (SENSITIVE) is audited with the user, role and IP  ->  [('selftest_owner', 'owner', 'GET /api/export', 'ok', '127.0.0.1')]
+SEC-01   PASS   Stored credentials: 64-hex PBKDF2 hash, 16-byte (32-hex) salt, 600 000  ->  [('selftest_owner', '684641bc...', 'f92ab9ff...', 600000), ('selftest_guest', '397bd566...', '03a0eb74...', 60
+SEC-02   PASS   The stored hash equals PBKDF2-HMAC-SHA256(password, salt, 600000) comp  ->  equal=True (0.24 s per guess = brute-force cost per candidate on this machine)
+SEC-03   PASS   Same password hashed twice gives different hash and salt (per-user ran  ->  hash_equal=False salt_equal=False
+SEC-04   PASS   Passwords do not appear in plaintext anywhere in the SQLite file  ->  found=[] (file 217088 bytes)
+SEC-05   PASS   Session tokens are stored only as SHA-256(token); the raw token is not  ->  hash_present=True raw_in_file=False columns=['token_hash', 'user_id', 'created_at', 'last_seen', 'stepup_until
+SEC-06   PASS   No API reply contains a password, hash, salt or session token  ->  none
+SEC-07   PASS   Constant-time comparisons (hmac.compare_digest) for password hashes an  ->  auth.compare_digest=True server.compare_digest=True dummy=True
+SEC-08   PASS   Password policy boundaries (>=8 and <=256 chars, not one repeated char  ->  {'7 chars': 400, '8 chars ok': 200, 'repeat': 400, 'equals user': 400, '257 chars': 400}
+SEC-09   PASS   Changing the password needs the current one, invalidates all OTHER ses  ->  403; 200; other=401; own=200; old_login=401; revert=200
+RATE-01  PASS   Per-IP request limit on /api: requests beyond the limit get 429 rate_l  ->  [200, 200, 200, 200, 200, 429, 429, 429] {'error': 'rate_limited', 'retry_after': 60}
+RATE-02  PASS   Static files are not counted by the API limiter  ->  [200, 200, 200, 200, 200, 200, 200, 200]
+RATE-03  NOTE   Rate-limiter defaults  ->  240 per 60 s (source constants; run raised to 10**6 for the test bench)
+SESS-01  PASS   Idle timeout 30 min (sliding): active at 1795 s, dead after a further   ->  200 then 401 rows_left=0
+SESS-02  PASS   Absolute lifetime 12 h cannot be extended by activity (request every 1  ->  first 401 at k=26 (offset 44200s); statuses=[200, 200, 401]
+SESS-03  PASS   Auth constants as documented  ->  600000, 5, 60, 900, 20
+TLS-01   PASS   Default mode is plain HTTP: no HSTS header, session cookie without Sec  ->  hsts=False
+TLS-02   PASS   cookie_header(secure=True) adds Secure; plain mode does not  ->  plain='fc_session=x; HttpOnly; SameSite=Strict; Path=/; Max-Age=10' tls='fc_session=x; HttpOnly; SameSite=Stri
+TLS-03   PASS   Starting with a missing/incomplete --tls-cert/--tls-key refuses to sta  ->  SystemExit: TLS needs BOTH --tls-cert FILE and --tls-key FILE pointing t
+TLS-04   PASS   Real TLS handshake with a throw-away self-signed certificate (verified  ->  200 TLSv1.3 server_min=TLSv1_2
+TLS-05   PASS   Over TLS the server sends Strict-Transport-Security  ->  max-age=31536000
+TLS-06   PASS   Over TLS the session cookie carries Secure + HttpOnly + SameSite=Stric  ->  status=200 flags=HttpOnly; SameSite=Strict; Path=/; Max-Age=43200; Secure
+TLS-07   PASS   A plain-HTTP request to the TLS port gets no application response  ->  0 RemoteDisconnected: Remote end closed connection without response
+TLS-08   NOTE   Residual: the app does not generate or renew certificates and has no H  ->  owner supplies cert/key
+DEMO-01  PASS   Default start creates no account at all (no default credentials); 'dem  ->  0
+DEMO-02  PASS   --demo-account: creates ONE owner 'demo' (hashed, 600k iterations), pa  ->  users=1 role=owner iterations=600000 banner=True pw_in_stdout=False pw_in_file=False second='already exists' i
+DEL-00   PASS   Precondition: data present before delete-all  ->  {'tx': 393, 'goals': 4, 'mem': 22, 'profile': (17, 123400)} canary_in_file=True
+DEL-01   PASS   delete-all empties transactions, goals and merchant_memory  ->  200 {'tx': 0, 'goals': 0, 'mem': 0, 'profile': (5, 900000)}
+DEL-02   PASS   delete-all resets the profile to defaults (payday 5, income 9000.00 CN  ->  (5, 900000)
+DEL-03   PASS   Deleted text is no longer present in the database file (VACUUM)  ->  before=True after=False
+DEL-04   PASS   Export after delete-all is empty  ->  0/0/0
+DEL-05   PASS   API still functional on an empty ledger  ->  200
+DEL-06   PASS   delete-all removes the consent record (right to erasure) and the next   ->  consent before=1 after=0 chat=428
+DEL-07   PASS   delete-all keeps accounts (users unchanged) and the audit log (grows,   ->  users_equal=True audit 160->167
+DEL-08   PASS   delete-all resets server-side lessons progress to pack 1 (throw-away s  ->  after=1
+DEL-09   PASS   delete-all is audited (action + user + outcome)  ->  [('selftest_owner', 'owner', 'POST /api/delete-all', 'ok')]
+MISC-01  PASS   Every state-changing route is POST-only (no GET mutations)  ->  writes in do_GET=False
+MISC-02  NOTE   Residual: one dataset per installation. The guest role shares the owne  ->  transactions/goals/profile/consent tables have no owner column
+MISC-03  NOTE   Residual: no encryption at rest (SQLite file, exports); plain HTTP unl  ->  db file in throw-away dir: throwaway.db
+MISC-04  NOTE   Residual: ThreadingHTTPServer per-request thread, 15 s socket timeout,  ->  timeout=15 s; RATE_LIMIT=240 requests/60 s per IP on /api only
+MISC-05  NOTE   Residual: audit log is tamper-EVIDENT, not tamper-proof (someone with   ->  chain = SHA-256(prev|ts|user|role|action|status|ip); no HMAC key, no external anchor
+MISC-06  NOTE   Residual: no formal penetration test, no PIPL legal review, no certifi  ->  this tool is a self-assessment
+ENV-01   PASS   Self-test did not modify project data files (size+mtime of data/app.db  ->  before={'C:\\Users\\eldiiar\\Desktop\\track\\data\\app.db': [184320, 1792440275862994200], 'C:\\Users\\eldiiar
+ENV-02   NOTE   Unhandled exceptions inside request handlers during the whole run (a t  ->  0: []
+
+TOTAL checks=347 PASS=325 FAIL=0 NOTE=22
+report_sha256=e669948913c1025a107f8eaa3dec722fcbdac6b424e32df4add76427e8fd4393
+(sha256 method: see report JSON field sha256_method)

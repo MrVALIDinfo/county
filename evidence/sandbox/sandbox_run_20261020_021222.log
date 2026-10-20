@@ -1,0 +1,558 @@
+SANDBOX EXECUTION LOG  run 20261020_021222
+==============================================================================
+                run_id: 20261020_021222
+               persona: Lin Xiaoyu (synthetic, no real data)
+           started_utc: 2026-10-19T20:12:22+00:00
+              app_date: 2026-10-20
+                python: 3.12.10
+              platform: Windows-10-10.0.19045-SP0
+                server: in-process ThreadingHTTPServer on 127.0.0.1:59998 (random port)
+              database: throwaway temp sqlite (deleted after run)
+    anthropic_key_used: False
+anthropic_key_was_in_env: False
+                  auth: owner xiaoyu + guest judge, per-run random passwords (never logged), session cookie fc_session via cookie jar
+                 mocks: bank connector = synthetic WeChat-style CSV; scan = canned DEMO result without LLM key; Ask-AI = deterministic planner, no LLM; lessons update = simulated content pack; benchmark = synthetic set data/bench_set.csv
+==============================================================================
+
+[STEP S1] Fresh install: the app is unconfigured and every data route refuses anonymous callers
+  time UTC 2026-10-19T20:12:22.024+00:00 | Asia/Shanghai 2026-10-20T04:12:22.024+08:00
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=30.4ms resp={"configured": false, "authenticated": false, "role": null, "consent": null, "idle_timeout_s": 1800}
+  > [owner] GET /api/state  body=null
+    status=401 latency=2.9ms resp={"error": "unauthenticated"}
+  > [owner] POST /api/chat  body={}
+    status=401 latency=2.0ms resp={"error": "unauthenticated"}
+  > [owner] GET /api/export  body=null
+    status=401 latency=2.1ms resp={"error": "unauthenticated"}
+  > [owner] GET /api/audit  body=null
+    status=401 latency=2.1ms resp={"error": "unauthenticated"}
+  [PASS] HTTP 200 on the public status route  -> 200
+  [PASS] no account exists yet (configured=false, authenticated=false)  -> (False, False)
+  [PASS] anonymous GET /api/state -> 401 unauthenticated  -> (401, 'unauthenticated')
+  [PASS] anonymous POST /api/chat -> 401 unauthenticated  -> (401, 'unauthenticated')
+  [PASS] anonymous GET /api/export -> 401 unauthenticated  -> (401, 'unauthenticated')
+  [PASS] anonymous GET /api/audit -> 401 unauthenticated  -> (401, 'unauthenticated')
+
+[STEP S2] First-run owner setup (POST /api/auth/setup): password policy, HttpOnly session cookie, single owner
+  time UTC 2026-10-19T20:12:22.064+00:00 | Asia/Shanghai 2026-10-20T04:12:22.064+08:00
+  > [owner] POST /api/auth/setup  body={"username": "xiaoyu", "password": "<redacted>"}
+    status=400 latency=2.1ms resp={"error": "password_too_short", "min_length": 8}
+  > [owner] POST /api/auth/setup  body={"username": "xiaoyu", "password": "<redacted>"}
+    status=200 latency=254.3ms resp={"ok": true, "username": "xiaoyu", "role": "owner"}
+  > [owner] POST /api/auth/setup  body={"username": "intruder", "password": "<redacted>"}
+    status=409 latency=5.4ms resp={"error": "already_configured"}
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.3ms resp={"configured": true, "authenticated": true, "username": "xiaoyu", "role": "owner", "stepup_until": null}
+  . owner 'xiaoyu' created with a 24-character random password (value never logged); cookie Secure flag is off because this sandbox is plain HTTP on loopback (set automatically under --tls-cert)
+  [PASS] password shorter than 8 characters rejected (400)  -> (400, 'password_too_short')
+  [PASS] no cookie issued on a failed setup  -> False
+  [PASS] owner created and logged in (200, role owner)  -> (200, 'owner')
+  [PASS] session cookie fc_session is set  -> True
+  [PASS] cookie is HttpOnly (not readable from JavaScript)  -> HttpOnly
+  [PASS] cookie is SameSite=Strict  -> Strict
+  [PASS] second setup refused (409 already_configured): only one owner can be created this way  -> (409, 'already_configured')
+  [PASS] status now reports authenticated owner xiaoyu  -> {'configured': True, 'authenticated': True, 'username': 'xiaoyu', 'role': 'owner', 'stepup_until': None, 'consent': None, 'idle_timeout_s': 1800}
+
+[STEP S3] Logout and login: server-side session revocation, generic failure message, token rotation
+  time UTC 2026-10-19T20:12:22.332+00:00 | Asia/Shanghai 2026-10-20T04:12:22.332+08:00
+  > [owner] POST /api/auth/logout  body={}
+    status=200 latency=9.5ms resp={"ok": true}
+  > [owner] GET /api/state  body=null
+    status=401 latency=2.7ms resp={"error": "unauthenticated"}
+  > [replay] GET /api/state  body=null
+    status=401 latency=2.5ms resp={"error": "unauthenticated"}
+  > [owner] POST /api/auth/login  body={"username": "xiaoyu", "password": "<redacted>"}
+    status=401 latency=261.5ms resp={"error": "invalid_credentials"}
+  > [owner] POST /api/auth/login  body={"username": "nobody_here", "password": "<redacted>"}
+    status=401 latency=262.6ms resp={"error": "invalid_credentials"}
+  > [owner] POST /api/auth/login  body={"username": "xiaoyu", "password": "<redacted>"}
+    status=200 latency=255.9ms resp={"ok": true, "username": "xiaoyu", "role": "owner"}
+  > [owner] GET /api/state  body=null
+    status=200 latency=6.5ms resp={"has_data": false, "tx_count": 0}
+  [PASS] logout ok (200)  -> 200
+  [PASS] cookie removed from the jar  -> False
+  [PASS] state after logout -> 401  -> 401
+  [PASS] a forged / revoked session token is rejected (401)  -> 401
+  [PASS] wrong password -> 401 invalid_credentials  -> (401, 'invalid_credentials')
+  [PASS] unknown user gives the SAME answer (no account enumeration)  -> (401, 'invalid_credentials')
+  [PASS] login with the right password (200, owner)  -> (200, 'owner')
+  [PASS] a new session token was issued (differs from the setup session)  -> token fingerprints differ
+  [PASS] authenticated read works (200)  -> 200
+
+[STEP S4] PIPL consent gate: data-ingestion routes answer HTTP 428 until the owner records consent (POST /api/consent)
+  time UTC 2026-10-19T20:12:23.142+00:00 | Asia/Shanghai 2026-10-20T04:12:23.142+08:00
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.8ms resp={"consent": null}
+  > [owner] POST /api/chat  body={"text": "Luckin 18"}
+    status=428 latency=7.1ms resp={"error": "consent_required"}
+  > [owner] POST /api/consent  body={"version": "v1", "agree": false}
+    status=400 latency=7.4ms resp={"error": "agree_required"}
+  > [owner] POST /api/consent  body={"version": "v1", "agree": true}
+    status=200 latency=10.2ms resp={"ok": true, "consent.version": "v1", "consent.at": "2026-10-19T20:12:23Z"}
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.3ms resp={"consent.version": "v1", "consent.at": "2026-10-19T20:12:23Z"}
+  [PASS] no consent recorded yet  -> None
+  [PASS] chat before consent -> 428 consent_required  -> (428, 'consent_required')
+  [PASS] consent without agree:true -> 400 agree_required  -> (400, 'agree_required')
+  [PASS] consent recorded (200, version v1)  -> (200, {'version': 'v1', 'at': '2026-10-19T20:12:23Z'})
+  [PASS] status shows the consent record  -> {'version': 'v1', 'at': '2026-10-19T20:12:23Z'}
+
+[STEP S5] Step-up re-authentication: a sensitive route (demo reset) is refused with 403 until the owner re-enters the password
+  time UTC 2026-10-19T20:12:23.178+00:00 | Asia/Shanghai 2026-10-20T04:12:23.178+08:00
+  > [owner] POST /api/demo  body={}
+    status=403 latency=7.7ms resp={"error": "stepup_required"}
+  > [owner] GET /api/export  body=null
+    status=403 latency=7.4ms resp={"error": "stepup_required"}
+  > [owner] POST /api/auth/stepup  body={"password": "<redacted>"}
+    status=403 latency=258.9ms resp={"error": "invalid_password"}
+  > [owner] POST /api/auth/stepup  body={"password": "<redacted>"}
+    status=200 latency=270.8ms resp={"ok": true, "stepup_until": 1792441043}
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.4ms resp={"stepup_until": 1792441043}
+  [PASS] POST /api/demo without step-up -> 403 stepup_required  -> (403, 'stepup_required')
+  [PASS] GET /api/export without step-up -> 403 stepup_required  -> (403, 'stepup_required')
+  [PASS] step-up with a wrong password -> 403 invalid_password  -> (403, 'invalid_password')
+  [PASS] step-up with the right password -> 200  -> (200, True)
+  [PASS] step-up window is about 5 minutes (250-305 s)  -> 299 s
+  [PASS] status reports the open step-up window  -> 1792441043
+
+[STEP 1] Health check: empty account state on a fresh throwaway database
+  time UTC 2026-10-19T20:12:23.729+00:00 | Asia/Shanghai 2026-10-20T04:12:23.729+08:00
+  > [owner] GET /api/state  body=null
+    status=200 latency=6.6ms resp={"has_data": false, "tx_count": 0, "status": "ok", "allowance_cents": 36250, "pending": {"digest": 0, "ask": 0}, "goals": "<list len=0>"}
+  [PASS] HTTP 200  -> 200
+  [PASS] account is empty (has_data=false, tx_count=0)  -> has_data=False tx_count=0
+  [PASS] no goals on a fresh account  -> []
+
+[STEP 2] Load the synthetic demo persona Lin Xiaoyu (POST /api/demo)
+  time UTC 2026-10-19T20:12:23.736+00:00 | Asia/Shanghai 2026-10-20T04:12:23.736+08:00
+  > [owner] POST /api/demo  body={}
+    status=200 latency=294.4ms resp={"read": 371, "imported": 371, "duplicates": 0, "skipped": 0, "silent": 367, "digest": 2, "ask": 2, "persona.nickname": "小雨"}
+  . records imported=371 silent=367 digest=2 ask=2
+  [PASS] HTTP 200  -> 200
+  [PASS] records imported > 300  -> 371
+  [PASS] no duplicates on first load  -> 0
+  [PASS] most records recorded silently  -> silent=367/371
+  [PASS] pending queue = digest + ask  -> digest=2 ask=2
+
+[STEP 3] Read the Home dashboard numbers (GET /api/state)
+  time UTC 2026-10-19T20:12:24.030+00:00 | Asia/Shanghai 2026-10-20T04:12:24.030+08:00
+  > [owner] GET /api/state  body=null
+    status=200 latency=7.9ms resp={"today": "2026-10-20", "tx_count": 371, "income_cents": 1500000, "spent_cents": 271400, "balance_cents": 1228600, "free_cents": 499296, "allowance_cents": 23776, "avg_flex_cents": 24571, "status": "tight", "savings_rate": 0.295, "pending": {"digest": 2, "ask": 2}, "cycle.days_left": 21, "cycle.next_payday": "2026-11-10"}
+  . allowance=CNY 237.76/day status=tight free=CNY 4992.96 savings_rate=0.295 goals=[('MacBook Air', 650000, 800000), ('Japan trip', 1088000, 1600000), ('Emergency fund', 1200000, 3000000)]
+  [PASS] HTTP 200  -> 200
+  [PASS] has_data true  -> True
+  [PASS] allowance > 0 ('you can spend today')  -> 237.76
+  [PASS] status in {ok,tight,over}  -> tight
+  [PASS] 3 demo goals present  -> ['MacBook Air', 'Japan trip', 'Emergency fund']
+  [PASS] savings_rate within [0,1]  -> 0.295
+
+[STEP 3b] Redacted account snapshot (counts only; reads GET /api/export, writes account_snapshot_after_demo.json)
+  time UTC 2026-10-19T20:12:24.038+00:00 | Asia/Shanghai 2026-10-20T04:12:24.038+08:00
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.3ms resp={"stepup_until": 1792441043, "role": "owner"}
+  > [owner] GET /api/export  body=null
+    status=200 latency=9.9ms resp={"profile.payday_day": 10, "profile.income_cents": 1500000}
+  . step-up still valid (export is a sensitive route); no re-authentication needed
+  . snapshot written: 371 transactions, 19 merchant-memory entries
+  [PASS] HTTP 200  -> 200
+  [PASS] snapshot total equals dashboard tx_count  -> 371 vs 371
+
+[STEP S6] Guest (viewer) role: owner creates read-only guest 'judge' after step-up; guest can read but cannot write
+  time UTC 2026-10-19T20:12:24.055+00:00 | Asia/Shanghai 2026-10-20T04:12:24.055+08:00
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.4ms resp={"stepup_until": 1792441043, "role": "owner"}
+  > [owner] POST /api/auth/viewer  body={"username": "judge", "password": "<redacted>"}
+    status=200 latency=258.1ms resp={"ok": true, "username": "judge", "role": "viewer"}
+  > [owner] GET /api/auth/users  body=null
+    status=200 latency=5.9ms resp={"users": "<list len=2>"}
+  > [guest] POST /api/auth/login  body={"username": "judge", "password": "<redacted>"}
+    status=200 latency=253.1ms resp={"ok": true, "username": "judge", "role": "viewer"}
+  > [guest] GET /api/state  body=null
+    status=200 latency=7.8ms resp={"has_data": true, "tx_count": 371, "status": "tight", "allowance_cents": 23776}
+  > [guest] GET /api/report?year=2026&month=10  body=null
+    status=200 latency=6.4ms resp={"empty": false, "count": 85}
+  > [guest] POST /api/ask  body={"kind": "budget"}
+    status=200 latency=6.9ms resp={"intent": "budget"}
+  > [guest] POST /api/chat  body={"text": "Luckin 18"}
+    status=403 latency=7.2ms resp={"error": "forbidden", "role": "viewer"}
+  > [guest] POST /api/goal/deposit  body={"id": 1, "amount_cents": 100}
+    status=403 latency=7.3ms resp={"error": "forbidden"}
+  > [guest] GET /api/audit  body=null
+    status=403 latency=4.8ms resp={"error": "forbidden"}
+  > [guest] GET /api/auth/users  body=null
+    status=403 latency=5.1ms resp={"error": "forbidden"}
+  > [guest] POST /api/auth/stepup  body={"password": "<redacted>"}
+    status=200 latency=260.4ms resp={"ok": true}
+  > [guest] GET /api/export  body=null
+    status=403 latency=7.6ms resp={"error": "forbidden"}
+  > [guest] POST /api/delete-all  body={}
+    status=403 latency=7.6ms resp={"error": "forbidden"}
+  > [owner] GET /api/state  body=null
+    status=200 latency=8.0ms resp={"tx_count": 371}
+  . step-up still valid (guest management is a sensitive route); no re-authentication needed
+  [PASS] guest account created (200, role viewer)  -> (200, 'viewer')
+  [PASS] owner can list accounts: xiaoyu (owner) and judge (viewer)  -> [('xiaoyu', 'owner'), ('judge', 'viewer')]
+  [PASS] user list exposes no password hash, salt or token  -> ['created_at', 'disabled', 'role', 'username']
+  [PASS] guest logs in with its own session (200, role viewer)  -> (200, 'viewer')
+  [PASS] guest can READ the dashboard (GET /api/state 200)  -> (200, 371)
+  [PASS] guest can read the monthly report (200)  -> 200
+  [PASS] guest can use Ask AI (read-only advice, 200)  -> (200, 'budget')
+  [PASS] guest WRITE (POST /api/chat) -> 403 forbidden  -> (403, 'forbidden')
+  [PASS] guest WRITE (POST /api/goal/deposit) -> 403 forbidden  -> 403
+  [PASS] guest cannot read the audit log (403)  -> 403
+  [PASS] guest cannot list accounts (403)  -> 403
+  [PASS] guest may re-authenticate (step-up 200)...  -> 200
+  [PASS] ...but still cannot export data: role is checked before step-up (403 forbidden)  -> (403, 'forbidden')
+  [PASS] guest cannot delete data (403)  -> 403
+  [PASS] owner data untouched by the guest's attempts  -> 371 == 371
+
+[STEP S7] Brute-force lockout on a throwaway user name 'lockout_probe': 4 x 401, then 429 with retry_after
+  time UTC 2026-10-19T20:12:24.918+00:00 | Asia/Shanghai 2026-10-20T04:12:24.918+08:00
+  > [attacker] POST /api/auth/login  body={"username": "lockout_probe", "password": "<redacted>"}
+    status=401 latency=254.2ms resp={"error": "invalid_credentials"}
+  > [attacker] POST /api/auth/login  body={"username": "lockout_probe", "password": "<redacted>"}
+    status=401 latency=263.7ms resp={"error": "invalid_credentials"}
+  > [attacker] POST /api/auth/login  body={"username": "lockout_probe", "password": "<redacted>"}
+    status=401 latency=270.0ms resp={"error": "invalid_credentials"}
+  > [attacker] POST /api/auth/login  body={"username": "lockout_probe", "password": "<redacted>"}
+    status=401 latency=263.4ms resp={"error": "invalid_credentials"}
+  > [attacker] POST /api/auth/login  body={"username": "lockout_probe", "password": "<redacted>"}
+    status=429 latency=252.7ms resp={"error": "locked", "retry_after": 60}
+  > [attacker] POST /api/auth/login  body={"username": "lockout_probe", "password": "<redacted>"}
+    status=429 latency=5.7ms resp={"error": "locked", "retry_after": 60}
+  > [owner-second-device] POST /api/auth/login  body={"username": "xiaoyu", "password": "<redacted>"}
+    status=200 latency=249.3ms resp={"ok": true, "username": "xiaoyu", "role": "owner"}
+  [PASS] attempts 1-4 -> 401 invalid_credentials, attempt 5 -> 429 locked  -> [401, 401, 401, 401, 429]
+  [PASS] 429 carries retry_after (60 s for the first lock)  -> {'error': 'locked', 'retry_after': 60}
+  [PASS] 6th attempt is refused before any password check (429, retry_after > 0)  -> (429, 60)
+  [PASS] lockout is per (IP, user name): the real owner can still sign in  -> 200
+
+[STEP 4a] Chat entry 'Luckin 18' -> known merchant, recorded SILENTLY
+  time UTC 2026-10-19T20:12:26.497+00:00 | Asia/Shanghai 2026-10-20T04:12:26.497+08:00
+  > [owner] POST /api/chat  body={"text": "Luckin 18"}
+    status=200 latency=11.3ms resp={"kind": "silent", "tx.merchant": "Luckin Coffee", "tx.amount_cents": 1800, "tx.category": "food_drink", "tx.mode": "silent", "tx.status": "auto"}
+  [PASS] kind == silent  -> silent
+  [PASS] amount 18.00 CNY  -> 1800
+  [PASS] category food_drink  -> food_drink
+
+[STEP 4b] Chat entry '转给 浩然 500' -> person transfer, the app ASKS; resolve as 'loan'
+  time UTC 2026-10-19T20:12:26.508+00:00 | Asia/Shanghai 2026-10-20T04:12:26.508+08:00
+  > [owner] POST /api/chat  body={"text": "转给 浩然 500"}
+    status=200 latency=10.3ms resp={"kind": "ask", "tx.id": 373, "tx.merchant": "浩然", "tx.amount_cents": 50000, "tx.reason": "person", "tx.status": "pending"}
+  > [owner] POST /api/resolve  body={"id": 373, "purpose": "loan"}
+    status=200 latency=9.4ms resp={"updated": 1}
+  > [owner] GET /api/transactions?year=2026&month=10&category=transfers  body=null
+    status=200 latency=6.3ms resp={"total_out": 50000}
+  [PASS] kind == ask  -> ask
+  [PASS] reason == person  -> person
+  [PASS] resolve updated 1 row  -> 1
+  [PASS] record now confirmed/transfers  -> ('confirmed', 'transfers')
+
+[STEP 4c] Chat entry 'potato 5' -> unknown merchant, DIGEST; confirm category; repeat goes SILENT (memory effect)
+  time UTC 2026-10-19T20:12:26.534+00:00 | Asia/Shanghai 2026-10-20T04:12:26.534+08:00
+  > [owner] POST /api/chat  body={"text": "potato 5"}
+    status=200 latency=11.1ms resp={"kind": "digest", "tx.id": 374, "tx.merchant": "potato", "tx.category": "other", "tx.reason": "new", "tx.status": "pending"}
+  > [owner] POST /api/confirm  body={"id": 374, "category": "groceries"}
+    status=200 latency=10.4ms resp={"updated": 1}
+  > [owner] POST /api/chat  body={"text": "potato 5"}
+    status=200 latency=10.3ms resp={"kind": "silent", "tx.category": "groceries", "tx.mode": "silent", "tx.status": "auto"}
+  . memory effect: digest (1 tap) -> silent (0 taps) after one confirmation
+  [PASS] first entry kind == digest  -> digest
+  [PASS] confirm updated >= 1 row  -> 1
+  [PASS] second identical entry kind == silent  -> silent
+  [PASS] second entry category learned = groceries  -> groceries
+
+[STEP 5] 'Needs a look' queue: list items with reasons, resolve every item
+  time UTC 2026-10-19T20:12:26.567+00:00 | Asia/Shanghai 2026-10-20T04:12:26.567+08:00
+  > [owner] GET /api/state  body=null
+    status=200 latency=7.6ms resp={"pending": {"digest": 2, "ask": 2}}
+  > [owner] GET /api/state  body=null
+    status=200 latency=7.6ms resp={"today": "2026-10-20", "has_data": true, "tx_count": 375, "cycle": {"start": "2026-10-10", "next_payday": "2026-11-10", "days": 31, "days_left": 21}, "income_cents": 1500000, "spent_cents": 324200, "balance_cents": 1175800, "projected_saving_cents": 329740, "upcoming_fixed_cents": 320000, "fixed_total_cents": 320000, "goal_reserve_cents": 409304, "free_cents": 446496, "allowance_cents": 21261, "avg_flex_cents": 28342}
+  > [owner] POST /api/confirm  body={"id": 360, "category": "food_drink"}
+    status=200 latency=10.0ms resp={"updated": 1}
+  > [owner] POST /api/confirm  body={"id": 346, "category": "shopping"}
+    status=200 latency=9.8ms resp={"updated": 1}
+  > [owner] POST /api/resolve  body={"id": 303, "purpose": "gift"}
+    status=200 latency=9.5ms resp={"updated": 1}
+  > [owner] POST /api/resolve  body={"id": 298, "purpose": "purchase"}
+    status=200 latency=9.3ms resp={"updated": 1}
+  > [owner] GET /api/state  body=null
+    status=200 latency=7.5ms resp={"pending.digest": 0, "pending.ask": 0, "allowance_cents": 21261, "status": "tight"}
+  . queue: id=360 digest/unusual CNY 96.00 (Luckin Coffee); id=346 digest/new CNY 168.00 (Tianhe Pet Shop); id=303 ask/person CNY 500.00 (浩然); id=298 ask/large CNY 3299.00 (携程旅行)
+  [PASS] queue has 4 items (2 digest + 2 ask) from the demo  -> 4
+  [PASS] every item carries a reason  -> ['unusual', 'new', 'person', 'large']
+  [PASS] item 360 resolved  -> 1
+  [PASS] item 346 resolved  -> 1
+  [PASS] item 303 resolved  -> 1
+  [PASS] item 298 resolved  -> 1
+  [PASS] queue is empty after resolving  -> {'digest': 0, 'ask': 0}
+
+[STEP 6a] Goals: add a goal (POST /api/goal) and deposit (POST /api/goal/deposit)
+  time UTC 2026-10-19T20:12:26.629+00:00 | Asia/Shanghai 2026-10-20T04:12:26.629+08:00
+  > [owner] POST /api/goal  body={"name": "Chengdu weekend (sandbox)", "target_cents": 300000, "deadline": "2027-02-17", "saved_cents": 0}
+    status=200 latency=22.9ms resp={"id": 4}
+  > [owner] POST /api/goal/deposit  body={"id": 4, "amount_cents": 50000}
+    status=200 latency=9.3ms resp={"ok": true}
+  > [owner] GET /api/state  body=null
+    status=200 latency=7.7ms resp={"today": "2026-10-20", "has_data": true, "tx_count": 375, "cycle": {"start": "2026-10-10", "next_payday": "2026-11-10", "days": 31, "days_left": 21}, "income_cents": 1500000, "spent_cents": 324200, "balance_cents": 1175800, "projected_saving_cents": 329740, "upcoming_fixed_cents": 320000, "fixed_total_cents": 320000, "goal_reserve_cents": 471804, "free_cents": 383996, "allowance_cents": 18285, "avg_flex_cents": 28342}
+  > [owner] POST /api/goal/delete  body={"id": 4}
+    status=200 latency=9.6ms resp={"ok": true}
+  . new goal progress=0.16666666666666666 monthly_needed=CNY 625.00
+  [PASS] goal created  -> 4
+  [PASS] deposit ok  -> {'ok': True}
+  [PASS] saved_cents == 50000 after deposit  -> 50000
+
+[STEP 6b] Goal what-if: find the demo goal whose +CNY 1,000 deposit flips dashboard status 'tight' -> 'ok'
+  time UTC 2026-10-19T20:12:26.679+00:00 | Asia/Shanghai 2026-10-20T04:12:26.679+08:00
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.1ms resp={"stepup_until": 1792441043, "role": "owner"}
+  > [owner] POST /api/demo  body={}
+    status=200 latency=294.6ms resp={"imported": 371, "silent": 367, "digest": 2, "ask": 2}
+  > [owner] GET /api/state  body=null
+    status=200 latency=8.0ms resp={"status": "tight", "allowance_cents": 23776, "avg_flex_cents": 24571}
+  > [owner] POST /api/goal/deposit  body={"id": 5, "amount_cents": 100000}
+    status=200 latency=9.7ms resp={"ok": true}
+  > [owner] GET /api/state  body=null
+    status=200 latency=7.9ms resp={"status": "ok", "allowance_cents": 25363}
+  > [owner] GET /api/state  body=null
+    status=200 latency=7.5ms resp={"goals": "<list len=3>"}
+  . step-up still valid (demo reset is a sensitive route); no re-authentication needed
+  . reset demo before the what-if: chat entries from step 4 add CNY 500+ of 14-day spend (transfers count), which would mask the calibrated flip
+  . before: status=tight allowance=CNY 237.76 avg_flex=CNY 245.71
+  . FLIP on 'Japan trip': status tight -> ok; allowance CNY 237.76 -> 253.63
+  [PASS] persona reloaded (reset demo)  -> 371
+  [PASS] starting status is 'tight'  -> tight
+  [PASS] a goal deposit flips tight -> ok  -> ('Japan trip', 'ok', 25363)
+  [PASS] allowance rose after the deposit  -> 237.76 -> 253.63
+  [PASS] goal is the demo 'Japan trip'  -> Japan trip
+
+[STEP 7] Ask-AI plans (mock planner): goal / save / budget / free-text
+  time UTC 2026-10-19T20:12:27.012+00:00 | Asia/Shanghai 2026-10-20T04:12:27.012+08:00
+  > [owner] POST /api/ask  body={"kind": "goal", "id": 5}
+    status=200 latency=7.4ms resp={"intent": "goal", "goal.name": "Japan trip", "extra_monthly_cents": 151979, "eta_now": "2027-01-04", "eta_new": "2026-11-28", "days_faster": 37, "on_time": true, "steps": "<list len=3>"}
+  > [owner] POST /api/ask  body={"kind": "save"}
+    status=200 latency=7.1ms resp={"intent": "save", "total_monthly_cents": 123869, "goal.name": "MacBook Air", "goal.days_faster": 29}
+  > [owner] POST /api/ask  body={"kind": "budget"}
+    status=200 latency=7.8ms resp={"intent": "budget", "allowance_cents": 25363, "status": "ok", "days_left": 21, "top_category": "food_drink"}
+  > [owner] POST /api/ask  body={"kind": "text", "text": "How can I reach my Japan trip goal faster?"}
+    status=200 latency=7.4ms resp={"intent": "goal", "goal.name": "Japan trip", "eta_now": "2027-01-04", "eta_new": "2026-11-28", "days_faster": 37, "extra_monthly_cents": 151979}
+  . goal plan steps: [{"type": "cut", "category": "food_drink", "monthly_cents": 67744}, {"type": "cut", "category": "shopping", "monthly_cents": 44235}, {"type": "friends", "n": 2, "each_cents": 20000, "monthly_cents": 40000}]
+  . save plan steps: [{"type": "cut", "category": "food_drink", "monthly_cents": 67744, "share": 0.484}, {"type": "cut", "category": "shopping", "monthly_cents": 44235, "share": 0.316}, {"type": "cut", "category": "groceries", "monthly_cents": 11890, "share": 0.085}]
+  [PASS] goal plan intent  -> goal
+  [PASS] accelerated ETA not later than current ETA  -> 2027-01-04 -> 2026-11-28
+  [PASS] save plan intent  -> save
+  [PASS] save plan has 1-3 cut steps  -> 3
+  [PASS] budget plan intent  -> budget
+  [PASS] free-text routed to goal plan  -> ('goal', 'Japan trip')
+
+[STEP 8] History filters, monthly report and weekly insights
+  time UTC 2026-10-19T20:12:27.042+00:00 | Asia/Shanghai 2026-10-20T04:12:27.042+08:00
+  > [owner] GET /api/transactions?year=2026&month=10&category=food_drink  body=null
+    status=200 latency=6.1ms resp={"total_out": 238000, "total_in": 0, "years": "<list len=1>"}
+  > [owner] GET /api/transactions?year=2026  body=null
+    status=200 latency=8.3ms resp={"total_out": 3002000, "years": "<list len=1>"}
+  > [owner] GET /api/report?year=2026&month=10  body=null
+    status=200 latency=6.7ms resp={"year": 2026, "month": 10, "income_cents": 1512900, "spent_cents": 824800, "net_cents": 688100, "count": 85, "spent_delta_pct": -15, "empty": false, "categories": "<list len=9>", "merchants": "<list len=5>"}
+  > [owner] GET /api/insights  body=null
+    status=200 latency=7.7ms resp={"has_data": true, "day_target_cents": 25936, "streak": {"current": 1, "best": 4, "ok_days": 34, "days_tracked": 60}, "week": {"this_cents": 145100, "prev_cents": 198900, "delta_pct": -27, "best_day": {"date": "2026-10-16", "spent_cents": 4900}, "top_category": {"category": "food_drink", "total_cents": 79100, "share": 0.545}, "tip": {"code": "keep", "saved_cents": 53800}, "from": "2026-10-14", "to": "2026-10-20"}, "badges": "<list len=5>", "goals_pace": {"6": 88345, "5": 161770, "7": 192754}}
+  . food_drink 2026-10: 50 items, total_out=CNY 2380.00
+  [PASS] HTTP 200  -> 200
+  [PASS] all items are food_drink and in the requested month  -> 50 items
+  [PASS] filtered total_out > 0  -> 2380.00
+  [PASS] year filter returns >= month filter  -> 30020.00 >= 2380.00
+  [PASS] report not empty  -> False
+  [PASS] net = income - spent  -> 688100
+  [PASS] category shares sum to ~1  -> 0.999
+  [PASS] insights has_data  -> True
+
+[STEP 9] Accuracy benchmark on the synthetic set (GET /api/benchmark)
+  time UTC 2026-10-19T20:12:27.072+00:00 | Asia/Shanghai 2026-10-20T04:12:27.072+08:00
+  > [owner] GET /api/benchmark  body=null
+    status=200 latency=13.5ms resp={"synthetic": true, "n": 60, "metrics": {"extraction_acc": 100.0, "category_acc": 78.3, "category_acc_known": 95.1, "category_acc_unseen_first": 0.0, "category_acc_unseen_all": 42.1, "silent_pct": 75.0, "question_pct": 25.0, "digest_pct": 18.3, "ask_pct": 6.7, "wrong_silent_pct": 3.3, "wrong_silent_of_silent_pct": 4.4, "mode_agreement_pct": 95.0, "avg_taps": 0.32, "manual_taps": 4}, "counts": {"n": 60, "chat": 15, "statement": 45, "known": 41, "unseen": 19, "unseen_first": 11, "silent": 45, "digest": 11, "ask": 4, "wrong_silent": 2}}
+  . metrics: {"extraction_acc": 100.0, "category_acc": 78.3, "category_acc_known": 95.1, "category_acc_unseen_first": 0.0, "category_acc_unseen_all": 42.1, "silent_pct": 75.0, "question_pct": 25.0, "digest_pct": 18.3, "ask_pct": 6.7, "wrong_silent_pct": 3.3, "wrong_silent_of_silent_pct": 4.4, "mode_agreement_pct": 95.0, "avg_taps": 0.32, "manual_taps": 4, "taps_saved_pct": 92.1}
+  . counts: {"n": 60, "chat": 15, "statement": 45, "known": 41, "unseen": 19, "unseen_first": 11, "silent": 45, "digest": 11, "ask": 4, "wrong_silent": 2}
+  [PASS] benchmark flagged synthetic  -> True
+  [PASS] n > 0 records replayed  -> 60
+  [PASS] metrics present (extraction, category, silent, taps)  -> ['ask_pct', 'avg_taps', 'category_acc', 'category_acc_known', 'category_acc_unseen_all', 'category_acc_unseen_first', 'digest_pct', 'extraction_acc', 'manual_taps', 'mode_agreement_pct', 'question_pct', 'silent_pct', 'taps_saved_pct', 'wrong_silent_of_silent_pct', 'wrong_silent_pct']
+
+[STEP 10a] Invest news (public RSS, server-side, allowlisted); offline falls back to labelled samples
+  time UTC 2026-10-19T20:12:27.086+00:00 | Asia/Shanghai 2026-10-20T04:12:27.086+08:00
+  > [owner] GET /api/news  body=null
+    status=200 latency=952.9ms resp={"live": true, "cached": false, "fetched_at": "2026-10-19T20:12:27.091722Z"}
+  . live=True items=60 sources=7 sample_items=0
+  [PASS] HTTP 200 and items returned (live or fallback)  -> live=True items=60
+
+[STEP 10b] Updatable lessons: v1 -> v2 (simulated content update) -> reset; research list follows version
+  time UTC 2026-10-19T20:12:28.039+00:00 | Asia/Shanghai 2026-10-20T04:12:28.039+08:00
+  > [owner] GET /api/lessons  body=null
+    status=200 latency=18.1ms resp={"version": 1, "latest_version": 3, "has_update": true, "updated_at": "2026-09-01"}
+  > [owner] POST /api/lessons/update  body={}
+    status=200 latency=10.0ms resp={"updated": true, "from": 1, "to": 2}
+  > [owner] GET /api/lessons  body=null
+    status=200 latency=6.4ms resp={"version": 2, "has_update": true}
+  > [owner] GET /api/research  body=null
+    status=200 latency=5.5ms resp={"version": 2}
+  > [owner] POST /api/lessons/reset  body={}
+    status=200 latency=8.0ms resp={"version": 1}
+  > [owner] GET /api/research  body=null
+    status=200 latency=5.9ms resp={"version": 1}
+  . v1 topics=6 latest_version=3
+  . v2 topics=8 tagged=3 changelog_entries=1
+  . research items: v1=7 v2=12
+  [PASS] starts at version 1  -> 1
+  [PASS] update 1 -> 2  -> (1, 2)
+  [PASS] now version 2  -> 2
+  [PASS] v2 has tagged new/updated topics  -> [None, None, None, None, 'updated', None, 'new', 'new']
+  [PASS] reset back to version 1  -> 1
+  [PASS] research list: v2 shows >= v1 items  -> v2=12 v1=7
+
+[STEP 11] Receipt photo path (POST /api/scan, tiny generated JPEG stub, no ANTHROPIC_API_KEY)
+  time UTC 2026-10-19T20:12:28.094+00:00 | Asia/Shanghai 2026-10-20T04:12:28.094+08:00
+  > [owner] POST /api/scan  body={"image": "/9j/4AAQSkZJRgABAQAAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...", "media_type": "image/jpeg"}
+    status=200 latency=10.4ms resp={"kind": "silent", "demo": true, "tx.merchant": "Hema", "tx.amount_cents": 4600, "tx.category": "groceries", "tx.confidence": 0.92, "tx.mode": "silent"}
+  . key_was_set_in_env=False (removed from the process env for determinism); JPEG stub bytes=86
+  . DEMO result is a fixed canned receipt; the image is NOT recognised without an LLM key
+  [PASS] scan returns a record (digest/ask/silent)  -> silent
+  [PASS] result is labelled DEMO (demo: true)  -> True
+
+[STEP 12] CSV import of a small generated WeChat-style statement, twice (dedupe proof)
+  time UTC 2026-10-19T20:12:28.104+00:00 | Asia/Shanghai 2026-10-20T04:12:28.104+08:00
+  > [owner] POST /api/import  body={"csv": "微信支付账单明细\n微信昵称：[小雨]\n----------------------微信支付账单明细列表------..."}
+    status=200 latency=11.7ms resp={"read": 5, "imported": 4, "duplicates": 0, "skipped": 1, "silent": 4, "digest": 0, "ask": 0}
+  > [owner] POST /api/import  body={"csv": "微信支付账单明细\n微信昵称：[小雨]\n----------------------微信支付账单明细列表------..."}
+    status=200 latency=8.0ms resp={"read": 5, "imported": 0, "duplicates": 4, "skipped": 1}
+  [PASS] first import: 4 imported, 1 failed row skipped  -> (4, 1)
+  [PASS] second import: 0 imported, 4 duplicates  -> (0, 4)
+
+[STEP 13a] Data-subject right: export (GET /api/export, counts only logged) on a fresh login that must step up first
+  time UTC 2026-10-19T20:12:28.124+00:00 | Asia/Shanghai 2026-10-20T04:12:28.124+08:00
+  > [owner] POST /api/auth/logout  body={}
+    status=200 latency=9.4ms resp={"ok": true}
+  > [owner] POST /api/auth/login  body={"username": "xiaoyu", "password": "<redacted>"}
+    status=200 latency=257.7ms resp={"ok": true, "username": "xiaoyu", "role": "owner"}
+  > [owner] GET /api/export  body=null
+    status=403 latency=7.7ms resp={"error": "stepup_required"}
+  > [owner] POST /api/auth/stepup  body={"password": "<redacted>"}
+    status=200 latency=269.6ms resp={"ok": true}
+  > [owner] GET /api/export  body=null
+    status=200 latency=10.3ms resp={"exported_at": "2026-10-19T20:12:28+00:00"}
+  . export counts: {"transactions": 376, "goals": 3, "merchant_memory": 19} (contents deliberately not logged)
+  [PASS] fresh login (new session carries no step-up)  -> 200
+  [PASS] export on the fresh session -> 403 stepup_required  -> (403, 'stepup_required')
+  [PASS] step-up ok (200)  -> 200
+  [PASS] export contains transactions, goals and profile  -> {'transactions': 376, 'goals': 3, 'merchant_memory': 19}
+
+[STEP 13b] Data-subject right: delete all (POST /api/delete-all) and verify empty
+  time UTC 2026-10-19T20:12:28.680+00:00 | Asia/Shanghai 2026-10-20T04:12:28.680+08:00
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.4ms resp={"stepup_until": 1792441048, "role": "owner"}
+  > [owner] POST /api/delete-all  body={}
+    status=200 latency=14.2ms resp={"ok": true}
+  > [owner] GET /api/state  body=null
+    status=200 latency=6.5ms resp={"has_data": false, "tx_count": 0, "goals": "<list len=0>", "pending": {"digest": 0, "ask": 0}}
+  > [owner] GET /api/export  body=null
+    status=200 latency=7.6ms resp={"exported_at": "2026-10-19T20:12:28+00:00", "note": "Amounts are in cents. Synthetic demo data unless you impo...", "profile": {"payday_day": 5, "income_cents": 900000, "fixed_expenses": "<list len=1>", "currency": "CNY"}, "goals": "<list len=0>", "transactions": "<list len=0>", "merchant_memory": "<list len=0>"}
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.1ms resp={"consent": null, "authenticated": true}
+  > [owner] POST /api/chat  body={"text": "Luckin 18"}
+    status=428 latency=7.6ms resp={"error": "consent_required"}
+  > [owner] GET /api/auth/users  body=null
+    status=200 latency=5.3ms resp={"users": "<list len=2>"}
+  . step-up still valid (delete-all is a sensitive route); no re-authentication needed
+  [PASS] delete-all ok  -> {'ok': True}
+  [PASS] account empty after delete  -> (False, 0)
+  [PASS] export after delete: 0 transactions, 0 goals, 0 memory  -> (0, 0, 0)
+  [PASS] erasure also removed the consent record  -> None
+  [PASS] chat after erasure -> 428 consent_required again  -> (428, 'consent_required')
+  [PASS] accounts (owner, judge) are kept by delete-all; only the ledger and consent are erased  -> 2
+
+[STEP 14] Negative / security probes through the same HTTP path (on a fresh login without step-up)
+  time UTC 2026-10-19T20:12:28.732+00:00 | Asia/Shanghai 2026-10-20T04:12:28.732+08:00
+  > [owner] POST /api/auth/logout  body={}
+    status=200 latency=9.8ms resp={"ok": true}
+  > [owner] POST /api/auth/login  body={"username": "xiaoyu", "password": "<redacted>"}
+    status=200 latency=252.6ms resp={"ok": true, "username": "xiaoyu", "role": "owner"}
+  > [owner] POST /api/chat  body={"raw_bytes": 20}
+    status=415 latency=1.0ms resp={"error": "unsupported media type"}
+  > [owner] POST /api/chat  body={"text": "Luckin 18"}
+    status=403 latency=0.8ms resp={"error": "bad_origin"}
+  > [owner] GET /api/transactions?year=abc  body=null
+    status=400 latency=5.3ms resp={"error": "bad_input"}
+  > [owner] GET /api/state  body=null
+    status=403 latency=0.9ms resp={"error": "forbidden"}
+  > [owner] GET /api/nope  body=null
+    status=403 latency=7.1ms resp={"error": "stepup_required"}
+  > [owner] POST /api/confirm  body={"id": 1, "category": "not_a_category"}
+    status=200 latency=7.6ms resp={"updated": 0}
+  [PASS] non-JSON content type -> 415  -> 415
+  [PASS] cross-origin POST -> 403 bad_origin (CSRF guard)  -> (403, 'bad_origin')
+  [PASS] bad year -> 400  -> 400
+  [PASS] foreign Host header -> 403 (DNS-rebinding guard)  -> 403
+  [PASS] unknown route falls into the strictest tier -> 403 stepup_required  -> (403, 'stepup_required')
+  [PASS] confirm with unknown id is harmless (updated 0)  -> (200, {'updated': 0})
+
+[STEP S8] Guest removal (sensitive, step-up) and tamper-evident access log (GET /api/audit)
+  time UTC 2026-10-19T20:12:29.018+00:00 | Asia/Shanghai 2026-10-20T04:12:29.018+08:00
+  > [owner] GET /api/auth/status  body=null
+    status=200 latency=5.3ms resp={"stepup_until": null, "role": "owner"}
+  > [owner] POST /api/auth/stepup  body={"password": "<redacted>"}
+    status=200 latency=255.3ms resp={"ok": true, "stepup_until": 1792441049}
+  > [owner] POST /api/auth/users/delete  body={"username": "judge"}
+    status=200 latency=9.9ms resp={"ok": true}
+  > [guest] POST /api/auth/login  body={"username": "judge", "password": "<redacted>"}
+    status=401 latency=258.9ms resp={"error": "invalid_credentials"}
+  > [guest] GET /api/state  body=null
+    status=401 latency=3.1ms resp={"error": "unauthenticated"}
+  > [owner] GET /api/audit?limit=500  body=null
+    status=200 latency=5.1ms resp={"chain_ok": true, "first_broken_id": null}
+  . step-up window had lapsed; re-authenticated (guest removal is a sensitive route)
+  . 63 audit entries; chain_ok=True; last 8 (newest first): #63 judge/- login -> invalid_credentials; #62 xiaoyu/owner POST /api/auth/users/delete -> ok; #61 xiaoyu/owner stepup -> ok; #60 xiaoyu/owner POST /api/confirm -> ok; #59 xiaoyu/owner GET /api/nope [denied] -> error:403; #58 xiaoyu/owner login -> ok; #57 xiaoyu/owner logout -> ok; #56 xiaoyu/owner POST /api/chat [denied] -> error:428
+  [PASS] guest 'judge' deleted (200)  -> (200, {'ok': True})
+  [PASS] deleted guest can no longer sign in (401)  -> 401
+  [PASS] deleted guest's old session is dead (401)  -> 401
+  [PASS] HTTP 200 and chain_ok == true (hash chain verifies end to end)  -> (200, True, None)
+  [PASS] log holds every action of this run (>= 60 entries, ids 1..N contiguous)  -> entries=63 last_id=63
+  [PASS] audit contains setup / ok  -> present
+  [PASS] audit contains login / ok  -> present
+  [PASS] audit contains login / invalid_credentials  -> present
+  [PASS] audit contains login / locked  -> present
+  [PASS] audit contains stepup / ok  -> present
+  [PASS] audit contains stepup / invalid_password  -> present
+  [PASS] audit contains POST /api/demo [denied] / error:403  -> present
+  [PASS] audit contains POST /api/chat [denied] / error:428  -> present
+  [PASS] audit contains POST /api/demo / ok  -> present
+  [PASS] audit contains POST /api/auth/viewer / ok  -> present
+  [PASS] audit contains GET /api/export / ok  -> present
+  [PASS] audit contains POST /api/delete-all / ok  -> present
+  [PASS] audit contains POST /api/auth/users/delete / ok  -> present
+  [PASS] a guest's denied write is attributed to user judge, role viewer  -> judge/viewer/[denied]
+  [PASS] no password, token or request body appears in the log  -> scanned all entries
+
+[STEP S9] Tamper test on the THROWAWAY database: edit one audit row directly, chain_ok must turn false; restore, true again
+  time UTC 2026-10-19T20:12:29.555+00:00 | Asia/Shanghai 2026-10-20T04:12:29.555+08:00
+  > [owner] GET /api/audit?limit=5  body=null
+    status=200 latency=6.1ms resp={"chain_ok": false, "first_broken_id": 59}
+  > [owner] GET /api/audit?limit=5  body=null
+    status=200 latency=5.5ms resp={"chain_ok": true, "first_broken_id": null}
+  . row #59 (status 'error:403') was edited and restored in the temp DB only; this is a test of detection, not a claim of tamper-proof storage
+  [PASS] after the edit chain_ok == false and first_broken_id points at the edited row  -> (False, 59, 59)
+  [PASS] after restoring the original value chain_ok == true again  -> True
+
+[STEP S10] Sign out: the session is revoked server-side
+  time UTC 2026-10-19T20:12:29.573+00:00 | Asia/Shanghai 2026-10-20T04:12:29.573+08:00
+  > [owner] POST /api/auth/logout  body={}
+    status=200 latency=10.0ms resp={"ok": true}
+  > [owner] GET /api/state  body=null
+    status=401 latency=2.9ms resp={"error": "unauthenticated"}
+  [PASS] logout ok  -> 200
+  [PASS] owner's session no longer works (401)  -> 401
+
+==============================================================================
+SUMMARY
+  steps_run: 30
+  http_calls: 126
+  assertions_passed: 163
+  assertions_failed: 0
+  total_duration_s: 8.07
+  result: PASS

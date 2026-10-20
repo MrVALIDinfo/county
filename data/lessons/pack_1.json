@@ -1,0 +1,361 @@
+{
+ "version": 1,
+ "date": "2026-09-01",
+ "topics": [
+  {
+   "id": "cushion",
+   "level": "beginner",
+   "minutes": 3,
+   "icon": "shield",
+   "en": {
+    "t": "Cushion first",
+    "s": "3 to 6 months of basics, within reach",
+    "p": [
+     "Before anything that can lose value, many people keep 3 to 6 months of basic spending (rent, food, transport) in an account they can reach within a day.",
+     "This is not an investment. Its job is to stop a surprise bill from forcing you to sell something at a bad moment.",
+     "Your numbers: add your fixed costs to an average month of flexible spending. That is your rough target. Build it from the free money the app shows each cycle."
+    ],
+    "k": "Cushion ≈ (rent + food + transport) × 3 to 6."
+   },
+   "zh": {
+    "t": "先留应急金",
+    "s": "3 到 6 个月的基本开销，随时能取",
+    "p": [
+     "在做任何可能亏损的事之前，很多人会先备好 3 到 6 个月的基本开销（房租、饮食、交通），放在一天内能取出的地方。",
+     "它不是投资。作用是遇到突发账单时，你不必在不好的时机被迫卖掉东西。",
+     "你的数据：把固定支出加上一个月的平均灵活支出，就是大致目标。用应用每个周期显示的可支配金额慢慢攒。"
+    ],
+    "k": "应急金 ≈（房租 + 饮食 + 交通）× 3 到 6 个月。"
+   },
+   "sources": [
+    {
+     "publisher": "SEC Investor.gov",
+     "title_en": "Introduction to Investing",
+     "title_zh": "投资入门",
+     "url": "https://www.investor.gov/introduction-investing"
+    },
+    {
+     "publisher": "FINRA",
+     "title_en": "Learn to Invest",
+     "title_zh": "学习投资",
+     "url": "https://www.finra.org/investors/learn-to-invest"
+    }
+   ]
+  },
+  {
+   "id": "risk",
+   "level": "beginner",
+   "minutes": 4,
+   "icon": "gauge",
+   "en": {
+    "t": "Match risk to time",
+    "s": "Short goals, calm assets",
+    "p": [
+     "Money you need within a year belongs in low-risk places. There is no time to recover from a drop.",
+     "Money for goals 5+ years away can handle bigger swings, because there is time to wait.",
+     "Ask two questions for every goal: when do I need it, and how big a drop could I live with?"
+    ],
+    "k": "The sooner you need it, the calmer it should be."
+   },
+   "zh": {
+    "t": "风险要匹配期限",
+    "s": "短期目标用稳妥的资产",
+    "p": [
+     "一年内要用的钱应放在低风险的地方，因为没有时间等它回升。",
+     "5 年以上的长期目标可以承受更大波动，因为有时间等待。",
+     "对每个目标问两个问题：我什么时候要用？我能承受多大的下跌？"
+    ],
+    "k": "越快要用，越要稳。"
+   },
+   "sources": [
+    {
+     "publisher": "FINRA",
+     "title_en": "Learn to Invest",
+     "title_zh": "学习投资",
+     "url": "https://www.finra.org/investors/learn-to-invest"
+    },
+    {
+     "publisher": "China Securities Investor Protection Fund",
+     "title_en": "Investor protection and education",
+     "title_zh": "投资者保护与教育",
+     "url": "https://www.sipf.com.cn/"
+    }
+   ]
+  },
+  {
+   "id": "spread",
+   "level": "beginner",
+   "minutes": 3,
+   "icon": "layers",
+   "en": {
+    "t": "Spread, don't bet",
+    "s": "No single thing should decide your outcome",
+    "p": [
+     "Putting everything into one asset ties your result to one company, one country or one trend.",
+     "Spreading across different kinds of assets means a bad stretch for one is cushioned by the others.",
+     "Spreading does not remove risk. It reduces the damage from any single surprise."
+    ],
+    "k": "Many small bets beat one big bet on survival."
+   },
+   "zh": {
+    "t": "分散，不要押注",
+    "s": "不要让单一事物决定结果",
+    "p": [
+     "把所有钱放进一个资产，结果就绑在一家公司、一个国家或一种趋势上。",
+     "分散到不同类型的资产，某一类表现不佳时，其他类别可以缓冲。",
+     "分散不能消除风险，但能降低单次意外带来的伤害。"
+    ],
+    "k": "分散小注，胜过孤注一掷。"
+   },
+   "sources": [
+    {
+     "publisher": "SEC Investor.gov",
+     "title_en": "Introduction to Investing",
+     "title_zh": "投资入门",
+     "url": "https://www.investor.gov/introduction-investing"
+    },
+    {
+     "publisher": "FINRA",
+     "title_en": "Learn to Invest",
+     "title_zh": "学习投资",
+     "url": "https://www.finra.org/investors/learn-to-invest"
+    }
+   ]
+  },
+  {
+   "id": "funds",
+   "level": "intermediate",
+   "minutes": 4,
+   "icon": "chart",
+   "en": {
+    "t": "What is an index fund?",
+    "s": "A basket that follows the market",
+    "p": [
+     "A fund pools many people's money and buys a basket of assets. An index fund copies a market index instead of trying to pick winners.",
+     "Typical traits: lower fees, instant spread across many companies, and results that follow the market, up and down.",
+     "Before anything else check three things: the fee, what it holds, and the minimum time horizon."
+    ],
+    "k": "Fees compound too. Lower is usually better."
+   },
+   "zh": {
+    "t": "什么是指数基金？",
+    "s": "跟随市场的一篮子资产",
+    "p": [
+     "基金把很多人的钱集中起来，买入一篮子资产。指数基金是复制某个市场指数，而不是挑选赢家。",
+     "常见特点：费用较低、一次分散到很多公司、收益跟随市场涨跌。",
+     "先看三件事：费用、持仓内容、建议持有期限。"
+    ],
+    "k": "费用也会累积，通常越低越好。"
+   },
+   "sources": [
+    {
+     "publisher": "SEC Investor.gov",
+     "title_en": "Introduction to Investing",
+     "title_zh": "投资入门",
+     "url": "https://www.investor.gov/introduction-investing"
+    },
+    {
+     "publisher": "Vanguard",
+     "title_en": "Investor education resources",
+     "title_zh": "投资者教育资源",
+     "url": "https://investor.vanguard.com/investor-resources-education"
+    }
+   ]
+  },
+  {
+   "id": "inflation",
+   "level": "beginner",
+   "minutes": 3,
+   "icon": "trenddown",
+   "en": {
+    "t": "Why cash slowly loses power",
+    "s": "The same ¥1,000 buys less each year",
+    "p": [
+     "Prices rise over time, so the same money buys less later. This is inflation.",
+     "If savings earn less than inflation, they lose buying power even though the number on the screen stays the same.",
+     "This is why long goals look at assets that have historically outpaced inflation, and accept more ups and downs for it."
+    ],
+    "k": "Safe-looking is not the same as risk-free."
+   },
+   "zh": {
+    "t": "为什么现金会慢慢贬值",
+    "s": "同样的 ¥1,000，每年能买的更少",
+    "p": [
+     "物价会随时间上涨，同样的钱以后能买的东西更少，这就是通货膨胀。",
+     "如果储蓄收益低于通胀，即使数字没变，购买力也在下降。",
+     "所以长期目标会考察历史上跑赢通胀的资产，并接受更大的起伏。"
+    ],
+    "k": "看起来安全，不等于没有风险。"
+   },
+   "sources": [
+    {
+     "publisher": "World Bank",
+     "title_en": "Inflation, consumer prices (data)",
+     "title_zh": "消费者价格通胀（数据）",
+     "url": "https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG"
+    },
+    {
+     "publisher": "National Bureau of Statistics of China",
+     "title_en": "Official price statistics",
+     "title_zh": "国家统计局价格统计",
+     "url": "https://www.stats.gov.cn/"
+    }
+   ]
+  },
+  {
+   "id": "compound",
+   "level": "beginner",
+   "minutes": 4,
+   "icon": "sparkles",
+   "en": {
+    "t": "Compound growth",
+    "s": "Growth that earns growth",
+    "p": [
+     "Returns earn returns. Small regular amounts left for years do more than most people expect.",
+     "Time matters more than size: starting earlier usually beats saving a bit more later.",
+     "Try the illustration below. The rates are examples, not forecasts."
+    ],
+    "k": "Start early, stay steady."
+   },
+   "zh": {
+    "t": "复利",
+    "s": "利滚利",
+    "p": [
+     "收益会产生新的收益。每月小额坚持多年，效果比多数人想象的大。",
+     "时间比金额更重要：早开始通常胜过晚些多存一点。",
+     "试试下面的演示。利率只是举例，不是预测。"
+    ],
+    "k": "早开始，稳着来。"
+   },
+   "sources": [
+    {
+     "publisher": "SEC Investor.gov",
+     "title_en": "Introduction to Investing",
+     "title_zh": "投资入门",
+     "url": "https://www.investor.gov/introduction-investing"
+    },
+    {
+     "publisher": "SEC Investor.gov",
+     "title_en": "Investing glossary",
+     "title_zh": "投资术语表",
+     "url": "https://www.investor.gov/introduction-investing/investing-basics/glossary"
+    }
+   ]
+  }
+ ],
+ "changelog": {
+  "added": [
+   "cushion",
+   "risk",
+   "spread",
+   "funds",
+   "inflation",
+   "compound"
+  ],
+  "updated": [],
+  "note_en": "First release: six core lessons.",
+  "note_zh": "首次发布：六节核心课程。"
+ },
+ "terms": [
+  {
+   "en": {
+    "term": "Inflation",
+    "def": "The general rise in prices over time, so money buys less."
+   },
+   "zh": {
+    "term": "通货膨胀",
+    "def": "物价整体随时间上涨，同样的钱能买的东西变少。"
+   }
+  },
+  {
+   "en": {
+    "term": "Compound interest",
+    "def": "Interest earned on the original amount plus past interest."
+   },
+   "zh": {
+    "term": "复利",
+    "def": "利息按本金加上已得利息计算。"
+   }
+  },
+  {
+   "en": {
+    "term": "Diversification",
+    "def": "Spreading money across different assets to reduce the damage from any one."
+   },
+   "zh": {
+    "term": "分散投资",
+    "def": "把钱分到不同资产，降低单一资产带来的冲击。"
+   }
+  },
+  {
+   "en": {
+    "term": "Index fund",
+    "def": "A fund that copies a market index instead of picking winners."
+   },
+   "zh": {
+    "term": "指数基金",
+    "def": "复制市场指数、而非挑选赢家的基金。"
+   }
+  },
+  {
+   "en": {
+    "term": "Liquidity",
+    "def": "How quickly something can be turned into cash without a big loss."
+   },
+   "zh": {
+    "term": "流动性",
+    "def": "资产在不大幅损失的前提下变现的快慢。"
+   }
+  },
+  {
+   "en": {
+    "term": "Expense ratio",
+    "def": "The yearly fee a fund charges, as a percentage of what you hold."
+   },
+   "zh": {
+    "term": "费率",
+    "def": "基金每年按持有金额收取的费用比例。"
+   }
+  },
+  {
+   "en": {
+    "term": "Yield",
+    "def": "The income an asset pays, usually shown as a percentage per year."
+   },
+   "zh": {
+    "term": "收益率",
+    "def": "资产带来的收入，通常按年化百分比表示。"
+   }
+  },
+  {
+   "en": {
+    "term": "Volatility",
+    "def": "How much and how fast a price moves up and down."
+   },
+   "zh": {
+    "term": "波动性",
+    "def": "价格上下起伏的幅度与速度。"
+   }
+  },
+  {
+   "en": {
+    "term": "Principal",
+    "def": "The original amount of money you put in or borrow."
+   },
+   "zh": {
+    "term": "本金",
+    "def": "你最初投入或借出的那笔钱。"
+   }
+  },
+  {
+   "en": {
+    "term": "Asset allocation",
+    "def": "How your money is divided among types of assets, such as cash, bonds and stocks."
+   },
+   "zh": {
+    "term": "资产配置",
+    "def": "把资金分配到现金、债券、股票等不同类型资产的方式。"
+   }
+  }
+ ]
+}

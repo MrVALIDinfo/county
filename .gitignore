@@ -1,0 +1,16 @@
+# local data and secrets
+data/*.db
+data/*.db-journal
+data/lessons_state.json
+.env
+*.pem
+*.key
+
+# python / editor
+__pycache__/
+*.pyc
+.vscode/
+
+# third-party design skills installed for development (see CLAUDE.md); not redistributed here
+.claude/skills/
+.claude/settings.local.json

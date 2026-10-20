@@ -1,0 +1,3031 @@
+{
+  "meta": {
+    "run_id": "20261020_021222",
+    "persona": "Lin Xiaoyu (synthetic, no real data)",
+    "started_utc": "2026-10-19T20:12:22+00:00",
+    "app_date": "2026-10-20",
+    "python": "3.12.10",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "server": "in-process ThreadingHTTPServer on 127.0.0.1:59998 (random port)",
+    "database": "throwaway temp sqlite (deleted after run)",
+    "anthropic_key_used": false,
+    "anthropic_key_was_in_env": false,
+    "auth": "owner xiaoyu + guest judge, per-run random passwords (never logged), session cookie fc_session via cookie jar",
+    "mocks": [
+      "bank connector = synthetic WeChat-style CSV",
+      "scan = canned DEMO result without LLM key",
+      "Ask-AI = deterministic planner, no LLM",
+      "lessons update = simulated content pack",
+      "benchmark = synthetic set data/bench_set.csv"
+    ]
+  },
+  "steps": [
+    {
+      "id": "S1",
+      "description": "Fresh install: the app is unconfigured and every data route refuses anonymous callers",
+      "ts_utc": "2026-10-19T20:12:22.024+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:22.024+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 30.4,
+          "response_key_fields": {
+            "configured": false,
+            "authenticated": false,
+            "role": null,
+            "consent": null,
+            "idle_timeout_s": 1800
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 401,
+          "latency_ms": 2.9,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {},
+          "status": 401,
+          "latency_ms": 2.0,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/export",
+          "request": null,
+          "status": 401,
+          "latency_ms": 2.1,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/audit",
+          "request": null,
+          "status": 401,
+          "latency_ms": 2.1,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "HTTP 200 on the public status route",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "no account exists yet (configured=false, authenticated=false)",
+          "result": "PASS",
+          "detail": "(False, False)"
+        },
+        {
+          "name": "anonymous GET /api/state -> 401 unauthenticated",
+          "result": "PASS",
+          "detail": "(401, 'unauthenticated')"
+        },
+        {
+          "name": "anonymous POST /api/chat -> 401 unauthenticated",
+          "result": "PASS",
+          "detail": "(401, 'unauthenticated')"
+        },
+        {
+          "name": "anonymous GET /api/export -> 401 unauthenticated",
+          "result": "PASS",
+          "detail": "(401, 'unauthenticated')"
+        },
+        {
+          "name": "anonymous GET /api/audit -> 401 unauthenticated",
+          "result": "PASS",
+          "detail": "(401, 'unauthenticated')"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "S2",
+      "description": "First-run owner setup (POST /api/auth/setup): password policy, HttpOnly session cookie, single owner",
+      "ts_utc": "2026-10-19T20:12:22.064+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:22.064+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/setup",
+          "request": {
+            "username": "xiaoyu",
+            "password": "<redacted>"
+          },
+          "status": 400,
+          "latency_ms": 2.1,
+          "response_key_fields": {
+            "error": "password_too_short",
+            "min_length": 8
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/setup",
+          "request": {
+            "username": "xiaoyu",
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 254.3,
+          "response_key_fields": {
+            "ok": true,
+            "username": "xiaoyu",
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/setup",
+          "request": {
+            "username": "intruder",
+            "password": "<redacted>"
+          },
+          "status": 409,
+          "latency_ms": 5.4,
+          "response_key_fields": {
+            "error": "already_configured"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.3,
+          "response_key_fields": {
+            "configured": true,
+            "authenticated": true,
+            "username": "xiaoyu",
+            "role": "owner",
+            "stepup_until": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "password shorter than 8 characters rejected (400)",
+          "result": "PASS",
+          "detail": "(400, 'password_too_short')"
+        },
+        {
+          "name": "no cookie issued on a failed setup",
+          "result": "PASS",
+          "detail": "False"
+        },
+        {
+          "name": "owner created and logged in (200, role owner)",
+          "result": "PASS",
+          "detail": "(200, 'owner')"
+        },
+        {
+          "name": "session cookie fc_session is set",
+          "result": "PASS",
+          "detail": "True"
+        },
+        {
+          "name": "cookie is HttpOnly (not readable from JavaScript)",
+          "result": "PASS",
+          "detail": "HttpOnly"
+        },
+        {
+          "name": "cookie is SameSite=Strict",
+          "result": "PASS",
+          "detail": "Strict"
+        },
+        {
+          "name": "second setup refused (409 already_configured): only one owner can be created this way",
+          "result": "PASS",
+          "detail": "(409, 'already_configured')"
+        },
+        {
+          "name": "status now reports authenticated owner xiaoyu",
+          "result": "PASS",
+          "detail": "{'configured': True, 'authenticated': True, 'username': 'xiaoyu', 'role': 'owner', 'stepup_until': None, 'consent': None, 'idle_timeout_s': 1800}"
+        }
+      ],
+      "notes": [
+        "owner 'xiaoyu' created with a 24-character random password (value never logged); cookie Secure flag is off because this sandbox is plain HTTP on loopback (set automatically under --tls-cert)"
+      ]
+    },
+    {
+      "id": "S3",
+      "description": "Logout and login: server-side session revocation, generic failure message, token rotation",
+      "ts_utc": "2026-10-19T20:12:22.332+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:22.332+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/logout",
+          "request": {},
+          "status": 200,
+          "latency_ms": 9.5,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 401,
+          "latency_ms": 2.7,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        },
+        {
+          "client": "replay",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 401,
+          "latency_ms": 2.5,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "xiaoyu",
+            "password": "<redacted>"
+          },
+          "status": 401,
+          "latency_ms": 261.5,
+          "response_key_fields": {
+            "error": "invalid_credentials"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "nobody_here",
+            "password": "<redacted>"
+          },
+          "status": 401,
+          "latency_ms": 262.6,
+          "response_key_fields": {
+            "error": "invalid_credentials"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "xiaoyu",
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 255.9,
+          "response_key_fields": {
+            "ok": true,
+            "username": "xiaoyu",
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.5,
+          "response_key_fields": {
+            "has_data": false,
+            "tx_count": 0
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "logout ok (200)",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "cookie removed from the jar",
+          "result": "PASS",
+          "detail": "False"
+        },
+        {
+          "name": "state after logout -> 401",
+          "result": "PASS",
+          "detail": "401"
+        },
+        {
+          "name": "a forged / revoked session token is rejected (401)",
+          "result": "PASS",
+          "detail": "401"
+        },
+        {
+          "name": "wrong password -> 401 invalid_credentials",
+          "result": "PASS",
+          "detail": "(401, 'invalid_credentials')"
+        },
+        {
+          "name": "unknown user gives the SAME answer (no account enumeration)",
+          "result": "PASS",
+          "detail": "(401, 'invalid_credentials')"
+        },
+        {
+          "name": "login with the right password (200, owner)",
+          "result": "PASS",
+          "detail": "(200, 'owner')"
+        },
+        {
+          "name": "a new session token was issued (differs from the setup session)",
+          "result": "PASS",
+          "detail": "token fingerprints differ"
+        },
+        {
+          "name": "authenticated read works (200)",
+          "result": "PASS",
+          "detail": "200"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "S4",
+      "description": "PIPL consent gate: data-ingestion routes answer HTTP 428 until the owner records consent (POST /api/consent)",
+      "ts_utc": "2026-10-19T20:12:23.142+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:23.142+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.8,
+          "response_key_fields": {
+            "consent": null
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "Luckin 18"
+          },
+          "status": 428,
+          "latency_ms": 7.1,
+          "response_key_fields": {
+            "error": "consent_required"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/consent",
+          "request": {
+            "version": "v1",
+            "agree": false
+          },
+          "status": 400,
+          "latency_ms": 7.4,
+          "response_key_fields": {
+            "error": "agree_required"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/consent",
+          "request": {
+            "version": "v1",
+            "agree": true
+          },
+          "status": 200,
+          "latency_ms": 10.2,
+          "response_key_fields": {
+            "ok": true,
+            "consent.version": "v1",
+            "consent.at": "2026-10-19T20:12:23Z"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.3,
+          "response_key_fields": {
+            "consent.version": "v1",
+            "consent.at": "2026-10-19T20:12:23Z"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "no consent recorded yet",
+          "result": "PASS",
+          "detail": "None"
+        },
+        {
+          "name": "chat before consent -> 428 consent_required",
+          "result": "PASS",
+          "detail": "(428, 'consent_required')"
+        },
+        {
+          "name": "consent without agree:true -> 400 agree_required",
+          "result": "PASS",
+          "detail": "(400, 'agree_required')"
+        },
+        {
+          "name": "consent recorded (200, version v1)",
+          "result": "PASS",
+          "detail": "(200, {'version': 'v1', 'at': '2026-10-19T20:12:23Z'})"
+        },
+        {
+          "name": "status shows the consent record",
+          "result": "PASS",
+          "detail": "{'version': 'v1', 'at': '2026-10-19T20:12:23Z'}"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "S5",
+      "description": "Step-up re-authentication: a sensitive route (demo reset) is refused with 403 until the owner re-enters the password",
+      "ts_utc": "2026-10-19T20:12:23.178+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:23.178+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/demo",
+          "request": {},
+          "status": 403,
+          "latency_ms": 7.7,
+          "response_key_fields": {
+            "error": "stepup_required"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/export",
+          "request": null,
+          "status": 403,
+          "latency_ms": 7.4,
+          "response_key_fields": {
+            "error": "stepup_required"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/stepup",
+          "request": {
+            "password": "<redacted>"
+          },
+          "status": 403,
+          "latency_ms": 258.9,
+          "response_key_fields": {
+            "error": "invalid_password"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/stepup",
+          "request": {
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 270.8,
+          "response_key_fields": {
+            "ok": true,
+            "stepup_until": 1792441043
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.4,
+          "response_key_fields": {
+            "stepup_until": 1792441043
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "POST /api/demo without step-up -> 403 stepup_required",
+          "result": "PASS",
+          "detail": "(403, 'stepup_required')"
+        },
+        {
+          "name": "GET /api/export without step-up -> 403 stepup_required",
+          "result": "PASS",
+          "detail": "(403, 'stepup_required')"
+        },
+        {
+          "name": "step-up with a wrong password -> 403 invalid_password",
+          "result": "PASS",
+          "detail": "(403, 'invalid_password')"
+        },
+        {
+          "name": "step-up with the right password -> 200",
+          "result": "PASS",
+          "detail": "(200, True)"
+        },
+        {
+          "name": "step-up window is about 5 minutes (250-305 s)",
+          "result": "PASS",
+          "detail": "299 s"
+        },
+        {
+          "name": "status reports the open step-up window",
+          "result": "PASS",
+          "detail": "1792441043"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "1",
+      "description": "Health check: empty account state on a fresh throwaway database",
+      "ts_utc": "2026-10-19T20:12:23.729+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:23.729+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.6,
+          "response_key_fields": {
+            "has_data": false,
+            "tx_count": 0,
+            "status": "ok",
+            "allowance_cents": 36250,
+            "pending": {
+              "digest": 0,
+              "ask": 0
+            },
+            "goals": "<list len=0>"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "HTTP 200",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "account is empty (has_data=false, tx_count=0)",
+          "result": "PASS",
+          "detail": "has_data=False tx_count=0"
+        },
+        {
+          "name": "no goals on a fresh account",
+          "result": "PASS",
+          "detail": "[]"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "2",
+      "description": "Load the synthetic demo persona Lin Xiaoyu (POST /api/demo)",
+      "ts_utc": "2026-10-19T20:12:23.736+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:23.736+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/demo",
+          "request": {},
+          "status": 200,
+          "latency_ms": 294.4,
+          "response_key_fields": {
+            "read": 371,
+            "imported": 371,
+            "duplicates": 0,
+            "skipped": 0,
+            "silent": 367,
+            "digest": 2,
+            "ask": 2,
+            "persona.nickname": "小雨"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "HTTP 200",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "records imported > 300",
+          "result": "PASS",
+          "detail": "371"
+        },
+        {
+          "name": "no duplicates on first load",
+          "result": "PASS",
+          "detail": "0"
+        },
+        {
+          "name": "most records recorded silently",
+          "result": "PASS",
+          "detail": "silent=367/371"
+        },
+        {
+          "name": "pending queue = digest + ask",
+          "result": "PASS",
+          "detail": "digest=2 ask=2"
+        }
+      ],
+      "notes": [
+        "records imported=371 silent=367 digest=2 ask=2"
+      ]
+    },
+    {
+      "id": "3",
+      "description": "Read the Home dashboard numbers (GET /api/state)",
+      "ts_utc": "2026-10-19T20:12:24.030+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:24.030+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.9,
+          "response_key_fields": {
+            "today": "2026-10-20",
+            "tx_count": 371,
+            "income_cents": 1500000,
+            "spent_cents": 271400,
+            "balance_cents": 1228600,
+            "free_cents": 499296,
+            "allowance_cents": 23776,
+            "avg_flex_cents": 24571,
+            "status": "tight",
+            "savings_rate": 0.295,
+            "pending": {
+              "digest": 2,
+              "ask": 2
+            },
+            "cycle.days_left": 21,
+            "cycle.next_payday": "2026-11-10"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "HTTP 200",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "has_data true",
+          "result": "PASS",
+          "detail": "True"
+        },
+        {
+          "name": "allowance > 0 ('you can spend today')",
+          "result": "PASS",
+          "detail": "237.76"
+        },
+        {
+          "name": "status in {ok,tight,over}",
+          "result": "PASS",
+          "detail": "tight"
+        },
+        {
+          "name": "3 demo goals present",
+          "result": "PASS",
+          "detail": "['MacBook Air', 'Japan trip', 'Emergency fund']"
+        },
+        {
+          "name": "savings_rate within [0,1]",
+          "result": "PASS",
+          "detail": "0.295"
+        }
+      ],
+      "notes": [
+        "allowance=CNY 237.76/day status=tight free=CNY 4992.96 savings_rate=0.295 goals=[('MacBook Air', 650000, 800000), ('Japan trip', 1088000, 1600000), ('Emergency fund', 1200000, 3000000)]"
+      ]
+    },
+    {
+      "id": "3b",
+      "description": "Redacted account snapshot (counts only; reads GET /api/export, writes account_snapshot_after_demo.json)",
+      "ts_utc": "2026-10-19T20:12:24.038+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:24.038+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.3,
+          "response_key_fields": {
+            "stepup_until": 1792441043,
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/export",
+          "request": null,
+          "status": 200,
+          "latency_ms": 9.9,
+          "response_key_fields": {
+            "profile.payday_day": 10,
+            "profile.income_cents": 1500000
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "HTTP 200",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "snapshot total equals dashboard tx_count",
+          "result": "PASS",
+          "detail": "371 vs 371"
+        }
+      ],
+      "notes": [
+        "step-up still valid (export is a sensitive route); no re-authentication needed",
+        "snapshot written: 371 transactions, 19 merchant-memory entries"
+      ]
+    },
+    {
+      "id": "S6",
+      "description": "Guest (viewer) role: owner creates read-only guest 'judge' after step-up; guest can read but cannot write",
+      "ts_utc": "2026-10-19T20:12:24.055+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:24.055+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.4,
+          "response_key_fields": {
+            "stepup_until": 1792441043,
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/viewer",
+          "request": {
+            "username": "judge",
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 258.1,
+          "response_key_fields": {
+            "ok": true,
+            "username": "judge",
+            "role": "viewer"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/users",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.9,
+          "response_key_fields": {
+            "users": "<list len=2>"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "judge",
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 253.1,
+          "response_key_fields": {
+            "ok": true,
+            "username": "judge",
+            "role": "viewer"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.8,
+          "response_key_fields": {
+            "has_data": true,
+            "tx_count": 371,
+            "status": "tight",
+            "allowance_cents": 23776
+          }
+        },
+        {
+          "client": "guest",
+          "method": "GET",
+          "path": "/api/report?year=2026&month=10",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.4,
+          "response_key_fields": {
+            "empty": false,
+            "count": 85
+          }
+        },
+        {
+          "client": "guest",
+          "method": "POST",
+          "path": "/api/ask",
+          "request": {
+            "kind": "budget"
+          },
+          "status": 200,
+          "latency_ms": 6.9,
+          "response_key_fields": {
+            "intent": "budget"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "Luckin 18"
+          },
+          "status": 403,
+          "latency_ms": 7.2,
+          "response_key_fields": {
+            "error": "forbidden",
+            "role": "viewer"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "POST",
+          "path": "/api/goal/deposit",
+          "request": {
+            "id": 1,
+            "amount_cents": 100
+          },
+          "status": 403,
+          "latency_ms": 7.3,
+          "response_key_fields": {
+            "error": "forbidden"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "GET",
+          "path": "/api/audit",
+          "request": null,
+          "status": 403,
+          "latency_ms": 4.8,
+          "response_key_fields": {
+            "error": "forbidden"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "GET",
+          "path": "/api/auth/users",
+          "request": null,
+          "status": 403,
+          "latency_ms": 5.1,
+          "response_key_fields": {
+            "error": "forbidden"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "POST",
+          "path": "/api/auth/stepup",
+          "request": {
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 260.4,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "guest",
+          "method": "GET",
+          "path": "/api/export",
+          "request": null,
+          "status": 403,
+          "latency_ms": 7.6,
+          "response_key_fields": {
+            "error": "forbidden"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "POST",
+          "path": "/api/delete-all",
+          "request": {},
+          "status": 403,
+          "latency_ms": 7.6,
+          "response_key_fields": {
+            "error": "forbidden"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 8.0,
+          "response_key_fields": {
+            "tx_count": 371
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "guest account created (200, role viewer)",
+          "result": "PASS",
+          "detail": "(200, 'viewer')"
+        },
+        {
+          "name": "owner can list accounts: xiaoyu (owner) and judge (viewer)",
+          "result": "PASS",
+          "detail": "[('xiaoyu', 'owner'), ('judge', 'viewer')]"
+        },
+        {
+          "name": "user list exposes no password hash, salt or token",
+          "result": "PASS",
+          "detail": "['created_at', 'disabled', 'role', 'username']"
+        },
+        {
+          "name": "guest logs in with its own session (200, role viewer)",
+          "result": "PASS",
+          "detail": "(200, 'viewer')"
+        },
+        {
+          "name": "guest can READ the dashboard (GET /api/state 200)",
+          "result": "PASS",
+          "detail": "(200, 371)"
+        },
+        {
+          "name": "guest can read the monthly report (200)",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "guest can use Ask AI (read-only advice, 200)",
+          "result": "PASS",
+          "detail": "(200, 'budget')"
+        },
+        {
+          "name": "guest WRITE (POST /api/chat) -> 403 forbidden",
+          "result": "PASS",
+          "detail": "(403, 'forbidden')"
+        },
+        {
+          "name": "guest WRITE (POST /api/goal/deposit) -> 403 forbidden",
+          "result": "PASS",
+          "detail": "403"
+        },
+        {
+          "name": "guest cannot read the audit log (403)",
+          "result": "PASS",
+          "detail": "403"
+        },
+        {
+          "name": "guest cannot list accounts (403)",
+          "result": "PASS",
+          "detail": "403"
+        },
+        {
+          "name": "guest may re-authenticate (step-up 200)...",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "...but still cannot export data: role is checked before step-up (403 forbidden)",
+          "result": "PASS",
+          "detail": "(403, 'forbidden')"
+        },
+        {
+          "name": "guest cannot delete data (403)",
+          "result": "PASS",
+          "detail": "403"
+        },
+        {
+          "name": "owner data untouched by the guest's attempts",
+          "result": "PASS",
+          "detail": "371 == 371"
+        }
+      ],
+      "notes": [
+        "step-up still valid (guest management is a sensitive route); no re-authentication needed"
+      ]
+    },
+    {
+      "id": "S7",
+      "description": "Brute-force lockout on a throwaway user name 'lockout_probe': 4 x 401, then 429 with retry_after",
+      "ts_utc": "2026-10-19T20:12:24.918+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:24.918+08:00",
+      "calls": [
+        {
+          "client": "attacker",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "lockout_probe",
+            "password": "<redacted>"
+          },
+          "status": 401,
+          "latency_ms": 254.2,
+          "response_key_fields": {
+            "error": "invalid_credentials"
+          }
+        },
+        {
+          "client": "attacker",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "lockout_probe",
+            "password": "<redacted>"
+          },
+          "status": 401,
+          "latency_ms": 263.7,
+          "response_key_fields": {
+            "error": "invalid_credentials"
+          }
+        },
+        {
+          "client": "attacker",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "lockout_probe",
+            "password": "<redacted>"
+          },
+          "status": 401,
+          "latency_ms": 270.0,
+          "response_key_fields": {
+            "error": "invalid_credentials"
+          }
+        },
+        {
+          "client": "attacker",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "lockout_probe",
+            "password": "<redacted>"
+          },
+          "status": 401,
+          "latency_ms": 263.4,
+          "response_key_fields": {
+            "error": "invalid_credentials"
+          }
+        },
+        {
+          "client": "attacker",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "lockout_probe",
+            "password": "<redacted>"
+          },
+          "status": 429,
+          "latency_ms": 252.7,
+          "response_key_fields": {
+            "error": "locked",
+            "retry_after": 60
+          }
+        },
+        {
+          "client": "attacker",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "lockout_probe",
+            "password": "<redacted>"
+          },
+          "status": 429,
+          "latency_ms": 5.7,
+          "response_key_fields": {
+            "error": "locked",
+            "retry_after": 60
+          }
+        },
+        {
+          "client": "owner-second-device",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "xiaoyu",
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 249.3,
+          "response_key_fields": {
+            "ok": true,
+            "username": "xiaoyu",
+            "role": "owner"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "attempts 1-4 -> 401 invalid_credentials, attempt 5 -> 429 locked",
+          "result": "PASS",
+          "detail": "[401, 401, 401, 401, 429]"
+        },
+        {
+          "name": "429 carries retry_after (60 s for the first lock)",
+          "result": "PASS",
+          "detail": "{'error': 'locked', 'retry_after': 60}"
+        },
+        {
+          "name": "6th attempt is refused before any password check (429, retry_after > 0)",
+          "result": "PASS",
+          "detail": "(429, 60)"
+        },
+        {
+          "name": "lockout is per (IP, user name): the real owner can still sign in",
+          "result": "PASS",
+          "detail": "200"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "4a",
+      "description": "Chat entry 'Luckin 18' -> known merchant, recorded SILENTLY",
+      "ts_utc": "2026-10-19T20:12:26.497+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:26.497+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "Luckin 18"
+          },
+          "status": 200,
+          "latency_ms": 11.3,
+          "response_key_fields": {
+            "kind": "silent",
+            "tx.merchant": "Luckin Coffee",
+            "tx.amount_cents": 1800,
+            "tx.category": "food_drink",
+            "tx.mode": "silent",
+            "tx.status": "auto"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "kind == silent",
+          "result": "PASS",
+          "detail": "silent"
+        },
+        {
+          "name": "amount 18.00 CNY",
+          "result": "PASS",
+          "detail": "1800"
+        },
+        {
+          "name": "category food_drink",
+          "result": "PASS",
+          "detail": "food_drink"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "4b",
+      "description": "Chat entry '转给 浩然 500' -> person transfer, the app ASKS; resolve as 'loan'",
+      "ts_utc": "2026-10-19T20:12:26.508+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:26.508+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "转给 浩然 500"
+          },
+          "status": 200,
+          "latency_ms": 10.3,
+          "response_key_fields": {
+            "kind": "ask",
+            "tx.id": 373,
+            "tx.merchant": "浩然",
+            "tx.amount_cents": 50000,
+            "tx.reason": "person",
+            "tx.status": "pending"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/resolve",
+          "request": {
+            "id": 373,
+            "purpose": "loan"
+          },
+          "status": 200,
+          "latency_ms": 9.4,
+          "response_key_fields": {
+            "updated": 1
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/transactions?year=2026&month=10&category=transfers",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.3,
+          "response_key_fields": {
+            "total_out": 50000
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "kind == ask",
+          "result": "PASS",
+          "detail": "ask"
+        },
+        {
+          "name": "reason == person",
+          "result": "PASS",
+          "detail": "person"
+        },
+        {
+          "name": "resolve updated 1 row",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "record now confirmed/transfers",
+          "result": "PASS",
+          "detail": "('confirmed', 'transfers')"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "4c",
+      "description": "Chat entry 'potato 5' -> unknown merchant, DIGEST; confirm category; repeat goes SILENT (memory effect)",
+      "ts_utc": "2026-10-19T20:12:26.534+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:26.534+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "potato 5"
+          },
+          "status": 200,
+          "latency_ms": 11.1,
+          "response_key_fields": {
+            "kind": "digest",
+            "tx.id": 374,
+            "tx.merchant": "potato",
+            "tx.category": "other",
+            "tx.reason": "new",
+            "tx.status": "pending"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/confirm",
+          "request": {
+            "id": 374,
+            "category": "groceries"
+          },
+          "status": 200,
+          "latency_ms": 10.4,
+          "response_key_fields": {
+            "updated": 1
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "potato 5"
+          },
+          "status": 200,
+          "latency_ms": 10.3,
+          "response_key_fields": {
+            "kind": "silent",
+            "tx.category": "groceries",
+            "tx.mode": "silent",
+            "tx.status": "auto"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "first entry kind == digest",
+          "result": "PASS",
+          "detail": "digest"
+        },
+        {
+          "name": "confirm updated >= 1 row",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "second identical entry kind == silent",
+          "result": "PASS",
+          "detail": "silent"
+        },
+        {
+          "name": "second entry category learned = groceries",
+          "result": "PASS",
+          "detail": "groceries"
+        }
+      ],
+      "notes": [
+        "memory effect: digest (1 tap) -> silent (0 taps) after one confirmation"
+      ]
+    },
+    {
+      "id": "5",
+      "description": "'Needs a look' queue: list items with reasons, resolve every item",
+      "ts_utc": "2026-10-19T20:12:26.567+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:26.567+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.6,
+          "response_key_fields": {
+            "pending": {
+              "digest": 2,
+              "ask": 2
+            }
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.6,
+          "response_key_fields": {
+            "today": "2026-10-20",
+            "has_data": true,
+            "tx_count": 375,
+            "cycle": {
+              "start": "2026-10-10",
+              "next_payday": "2026-11-10",
+              "days": 31,
+              "days_left": 21
+            },
+            "income_cents": 1500000,
+            "spent_cents": 324200,
+            "balance_cents": 1175800,
+            "projected_saving_cents": 329740,
+            "upcoming_fixed_cents": 320000,
+            "fixed_total_cents": 320000,
+            "goal_reserve_cents": 409304,
+            "free_cents": 446496,
+            "allowance_cents": 21261,
+            "avg_flex_cents": 28342
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/confirm",
+          "request": {
+            "id": 360,
+            "category": "food_drink"
+          },
+          "status": 200,
+          "latency_ms": 10.0,
+          "response_key_fields": {
+            "updated": 1
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/confirm",
+          "request": {
+            "id": 346,
+            "category": "shopping"
+          },
+          "status": 200,
+          "latency_ms": 9.8,
+          "response_key_fields": {
+            "updated": 1
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/resolve",
+          "request": {
+            "id": 303,
+            "purpose": "gift"
+          },
+          "status": 200,
+          "latency_ms": 9.5,
+          "response_key_fields": {
+            "updated": 1
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/resolve",
+          "request": {
+            "id": 298,
+            "purpose": "purchase"
+          },
+          "status": 200,
+          "latency_ms": 9.3,
+          "response_key_fields": {
+            "updated": 1
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.5,
+          "response_key_fields": {
+            "pending.digest": 0,
+            "pending.ask": 0,
+            "allowance_cents": 21261,
+            "status": "tight"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "queue has 4 items (2 digest + 2 ask) from the demo",
+          "result": "PASS",
+          "detail": "4"
+        },
+        {
+          "name": "every item carries a reason",
+          "result": "PASS",
+          "detail": "['unusual', 'new', 'person', 'large']"
+        },
+        {
+          "name": "item 360 resolved",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "item 346 resolved",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "item 303 resolved",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "item 298 resolved",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "queue is empty after resolving",
+          "result": "PASS",
+          "detail": "{'digest': 0, 'ask': 0}"
+        }
+      ],
+      "notes": [
+        "queue: id=360 digest/unusual CNY 96.00 (Luckin Coffee); id=346 digest/new CNY 168.00 (Tianhe Pet Shop); id=303 ask/person CNY 500.00 (浩然); id=298 ask/large CNY 3299.00 (携程旅行)"
+      ]
+    },
+    {
+      "id": "6a",
+      "description": "Goals: add a goal (POST /api/goal) and deposit (POST /api/goal/deposit)",
+      "ts_utc": "2026-10-19T20:12:26.629+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:26.629+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/goal",
+          "request": {
+            "name": "Chengdu weekend (sandbox)",
+            "target_cents": 300000,
+            "deadline": "2027-02-17",
+            "saved_cents": 0
+          },
+          "status": 200,
+          "latency_ms": 22.9,
+          "response_key_fields": {
+            "id": 4
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/goal/deposit",
+          "request": {
+            "id": 4,
+            "amount_cents": 50000
+          },
+          "status": 200,
+          "latency_ms": 9.3,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.7,
+          "response_key_fields": {
+            "today": "2026-10-20",
+            "has_data": true,
+            "tx_count": 375,
+            "cycle": {
+              "start": "2026-10-10",
+              "next_payday": "2026-11-10",
+              "days": 31,
+              "days_left": 21
+            },
+            "income_cents": 1500000,
+            "spent_cents": 324200,
+            "balance_cents": 1175800,
+            "projected_saving_cents": 329740,
+            "upcoming_fixed_cents": 320000,
+            "fixed_total_cents": 320000,
+            "goal_reserve_cents": 471804,
+            "free_cents": 383996,
+            "allowance_cents": 18285,
+            "avg_flex_cents": 28342
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/goal/delete",
+          "request": {
+            "id": 4
+          },
+          "status": 200,
+          "latency_ms": 9.6,
+          "response_key_fields": {
+            "ok": true
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "goal created",
+          "result": "PASS",
+          "detail": "4"
+        },
+        {
+          "name": "deposit ok",
+          "result": "PASS",
+          "detail": "{'ok': True}"
+        },
+        {
+          "name": "saved_cents == 50000 after deposit",
+          "result": "PASS",
+          "detail": "50000"
+        }
+      ],
+      "notes": [
+        "new goal progress=0.16666666666666666 monthly_needed=CNY 625.00"
+      ]
+    },
+    {
+      "id": "6b",
+      "description": "Goal what-if: find the demo goal whose +CNY 1,000 deposit flips dashboard status 'tight' -> 'ok'",
+      "ts_utc": "2026-10-19T20:12:26.679+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:26.679+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.1,
+          "response_key_fields": {
+            "stepup_until": 1792441043,
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/demo",
+          "request": {},
+          "status": 200,
+          "latency_ms": 294.6,
+          "response_key_fields": {
+            "imported": 371,
+            "silent": 367,
+            "digest": 2,
+            "ask": 2
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 8.0,
+          "response_key_fields": {
+            "status": "tight",
+            "allowance_cents": 23776,
+            "avg_flex_cents": 24571
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/goal/deposit",
+          "request": {
+            "id": 5,
+            "amount_cents": 100000
+          },
+          "status": 200,
+          "latency_ms": 9.7,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.9,
+          "response_key_fields": {
+            "status": "ok",
+            "allowance_cents": 25363
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.5,
+          "response_key_fields": {
+            "goals": "<list len=3>"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "persona reloaded (reset demo)",
+          "result": "PASS",
+          "detail": "371"
+        },
+        {
+          "name": "starting status is 'tight'",
+          "result": "PASS",
+          "detail": "tight"
+        },
+        {
+          "name": "a goal deposit flips tight -> ok",
+          "result": "PASS",
+          "detail": "('Japan trip', 'ok', 25363)"
+        },
+        {
+          "name": "allowance rose after the deposit",
+          "result": "PASS",
+          "detail": "237.76 -> 253.63"
+        },
+        {
+          "name": "goal is the demo 'Japan trip'",
+          "result": "PASS",
+          "detail": "Japan trip"
+        }
+      ],
+      "notes": [
+        "step-up still valid (demo reset is a sensitive route); no re-authentication needed",
+        "reset demo before the what-if: chat entries from step 4 add CNY 500+ of 14-day spend (transfers count), which would mask the calibrated flip",
+        "before: status=tight allowance=CNY 237.76 avg_flex=CNY 245.71",
+        "FLIP on 'Japan trip': status tight -> ok; allowance CNY 237.76 -> 253.63"
+      ]
+    },
+    {
+      "id": "7",
+      "description": "Ask-AI plans (mock planner): goal / save / budget / free-text",
+      "ts_utc": "2026-10-19T20:12:27.012+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:27.012+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/ask",
+          "request": {
+            "kind": "goal",
+            "id": 5
+          },
+          "status": 200,
+          "latency_ms": 7.4,
+          "response_key_fields": {
+            "intent": "goal",
+            "goal.name": "Japan trip",
+            "extra_monthly_cents": 151979,
+            "eta_now": "2027-01-04",
+            "eta_new": "2026-11-28",
+            "days_faster": 37,
+            "on_time": true,
+            "steps": "<list len=3>"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/ask",
+          "request": {
+            "kind": "save"
+          },
+          "status": 200,
+          "latency_ms": 7.1,
+          "response_key_fields": {
+            "intent": "save",
+            "total_monthly_cents": 123869,
+            "goal.name": "MacBook Air",
+            "goal.days_faster": 29
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/ask",
+          "request": {
+            "kind": "budget"
+          },
+          "status": 200,
+          "latency_ms": 7.8,
+          "response_key_fields": {
+            "intent": "budget",
+            "allowance_cents": 25363,
+            "status": "ok",
+            "days_left": 21,
+            "top_category": "food_drink"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/ask",
+          "request": {
+            "kind": "text",
+            "text": "How can I reach my Japan trip goal faster?"
+          },
+          "status": 200,
+          "latency_ms": 7.4,
+          "response_key_fields": {
+            "intent": "goal",
+            "goal.name": "Japan trip",
+            "eta_now": "2027-01-04",
+            "eta_new": "2026-11-28",
+            "days_faster": 37,
+            "extra_monthly_cents": 151979
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "goal plan intent",
+          "result": "PASS",
+          "detail": "goal"
+        },
+        {
+          "name": "accelerated ETA not later than current ETA",
+          "result": "PASS",
+          "detail": "2027-01-04 -> 2026-11-28"
+        },
+        {
+          "name": "save plan intent",
+          "result": "PASS",
+          "detail": "save"
+        },
+        {
+          "name": "save plan has 1-3 cut steps",
+          "result": "PASS",
+          "detail": "3"
+        },
+        {
+          "name": "budget plan intent",
+          "result": "PASS",
+          "detail": "budget"
+        },
+        {
+          "name": "free-text routed to goal plan",
+          "result": "PASS",
+          "detail": "('goal', 'Japan trip')"
+        }
+      ],
+      "notes": [
+        "goal plan steps: [{\"type\": \"cut\", \"category\": \"food_drink\", \"monthly_cents\": 67744}, {\"type\": \"cut\", \"category\": \"shopping\", \"monthly_cents\": 44235}, {\"type\": \"friends\", \"n\": 2, \"each_cents\": 20000, \"monthly_cents\": 40000}]",
+        "save plan steps: [{\"type\": \"cut\", \"category\": \"food_drink\", \"monthly_cents\": 67744, \"share\": 0.484}, {\"type\": \"cut\", \"category\": \"shopping\", \"monthly_cents\": 44235, \"share\": 0.316}, {\"type\": \"cut\", \"category\": \"groceries\", \"monthly_cents\": 11890, \"share\": 0.085}]"
+      ]
+    },
+    {
+      "id": "8",
+      "description": "History filters, monthly report and weekly insights",
+      "ts_utc": "2026-10-19T20:12:27.042+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:27.042+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/transactions?year=2026&month=10&category=food_drink",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.1,
+          "response_key_fields": {
+            "total_out": 238000,
+            "total_in": 0,
+            "years": "<list len=1>"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/transactions?year=2026",
+          "request": null,
+          "status": 200,
+          "latency_ms": 8.3,
+          "response_key_fields": {
+            "total_out": 3002000,
+            "years": "<list len=1>"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/report?year=2026&month=10",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.7,
+          "response_key_fields": {
+            "year": 2026,
+            "month": 10,
+            "income_cents": 1512900,
+            "spent_cents": 824800,
+            "net_cents": 688100,
+            "count": 85,
+            "spent_delta_pct": -15,
+            "empty": false,
+            "categories": "<list len=9>",
+            "merchants": "<list len=5>"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/insights",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.7,
+          "response_key_fields": {
+            "has_data": true,
+            "day_target_cents": 25936,
+            "streak": {
+              "current": 1,
+              "best": 4,
+              "ok_days": 34,
+              "days_tracked": 60
+            },
+            "week": {
+              "this_cents": 145100,
+              "prev_cents": 198900,
+              "delta_pct": -27,
+              "best_day": {
+                "date": "2026-10-16",
+                "spent_cents": 4900
+              },
+              "top_category": {
+                "category": "food_drink",
+                "total_cents": 79100,
+                "share": 0.545
+              },
+              "tip": {
+                "code": "keep",
+                "saved_cents": 53800
+              },
+              "from": "2026-10-14",
+              "to": "2026-10-20"
+            },
+            "badges": "<list len=5>",
+            "goals_pace": {
+              "6": 88345,
+              "5": 161770,
+              "7": 192754
+            }
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "HTTP 200",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "all items are food_drink and in the requested month",
+          "result": "PASS",
+          "detail": "50 items"
+        },
+        {
+          "name": "filtered total_out > 0",
+          "result": "PASS",
+          "detail": "2380.00"
+        },
+        {
+          "name": "year filter returns >= month filter",
+          "result": "PASS",
+          "detail": "30020.00 >= 2380.00"
+        },
+        {
+          "name": "report not empty",
+          "result": "PASS",
+          "detail": "False"
+        },
+        {
+          "name": "net = income - spent",
+          "result": "PASS",
+          "detail": "688100"
+        },
+        {
+          "name": "category shares sum to ~1",
+          "result": "PASS",
+          "detail": "0.999"
+        },
+        {
+          "name": "insights has_data",
+          "result": "PASS",
+          "detail": "True"
+        }
+      ],
+      "notes": [
+        "food_drink 2026-10: 50 items, total_out=CNY 2380.00"
+      ]
+    },
+    {
+      "id": "9",
+      "description": "Accuracy benchmark on the synthetic set (GET /api/benchmark)",
+      "ts_utc": "2026-10-19T20:12:27.072+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:27.072+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/benchmark",
+          "request": null,
+          "status": 200,
+          "latency_ms": 13.5,
+          "response_key_fields": {
+            "synthetic": true,
+            "n": 60,
+            "metrics": {
+              "extraction_acc": 100.0,
+              "category_acc": 78.3,
+              "category_acc_known": 95.1,
+              "category_acc_unseen_first": 0.0,
+              "category_acc_unseen_all": 42.1,
+              "silent_pct": 75.0,
+              "question_pct": 25.0,
+              "digest_pct": 18.3,
+              "ask_pct": 6.7,
+              "wrong_silent_pct": 3.3,
+              "wrong_silent_of_silent_pct": 4.4,
+              "mode_agreement_pct": 95.0,
+              "avg_taps": 0.32,
+              "manual_taps": 4
+            },
+            "counts": {
+              "n": 60,
+              "chat": 15,
+              "statement": 45,
+              "known": 41,
+              "unseen": 19,
+              "unseen_first": 11,
+              "silent": 45,
+              "digest": 11,
+              "ask": 4,
+              "wrong_silent": 2
+            }
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "benchmark flagged synthetic",
+          "result": "PASS",
+          "detail": "True"
+        },
+        {
+          "name": "n > 0 records replayed",
+          "result": "PASS",
+          "detail": "60"
+        },
+        {
+          "name": "metrics present (extraction, category, silent, taps)",
+          "result": "PASS",
+          "detail": "['ask_pct', 'avg_taps', 'category_acc', 'category_acc_known', 'category_acc_unseen_all', 'category_acc_unseen_first', 'digest_pct', 'extraction_acc', 'manual_taps', 'mode_agreement_pct', 'question_pct', 'silent_pct', 'taps_saved_pct', 'wrong_silent_of_silent_pct', 'wrong_silent_pct']"
+        }
+      ],
+      "notes": [
+        "metrics: {\"extraction_acc\": 100.0, \"category_acc\": 78.3, \"category_acc_known\": 95.1, \"category_acc_unseen_first\": 0.0, \"category_acc_unseen_all\": 42.1, \"silent_pct\": 75.0, \"question_pct\": 25.0, \"digest_pct\": 18.3, \"ask_pct\": 6.7, \"wrong_silent_pct\": 3.3, \"wrong_silent_of_silent_pct\": 4.4, \"mode_agreement_pct\": 95.0, \"avg_taps\": 0.32, \"manual_taps\": 4, \"taps_saved_pct\": 92.1}",
+        "counts: {\"n\": 60, \"chat\": 15, \"statement\": 45, \"known\": 41, \"unseen\": 19, \"unseen_first\": 11, \"silent\": 45, \"digest\": 11, \"ask\": 4, \"wrong_silent\": 2}"
+      ]
+    },
+    {
+      "id": "10a",
+      "description": "Invest news (public RSS, server-side, allowlisted); offline falls back to labelled samples",
+      "ts_utc": "2026-10-19T20:12:27.086+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:27.086+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/news",
+          "request": null,
+          "status": 200,
+          "latency_ms": 952.9,
+          "response_key_fields": {
+            "live": true,
+            "cached": false,
+            "fetched_at": "2026-10-19T20:12:27.091722Z"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "HTTP 200 and items returned (live or fallback)",
+          "result": "PASS",
+          "detail": "live=True items=60"
+        }
+      ],
+      "notes": [
+        "live=True items=60 sources=7 sample_items=0"
+      ]
+    },
+    {
+      "id": "10b",
+      "description": "Updatable lessons: v1 -> v2 (simulated content update) -> reset; research list follows version",
+      "ts_utc": "2026-10-19T20:12:28.039+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:28.039+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/lessons",
+          "request": null,
+          "status": 200,
+          "latency_ms": 18.1,
+          "response_key_fields": {
+            "version": 1,
+            "latest_version": 3,
+            "has_update": true,
+            "updated_at": "2026-09-01"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/lessons/update",
+          "request": {},
+          "status": 200,
+          "latency_ms": 10.0,
+          "response_key_fields": {
+            "updated": true,
+            "from": 1,
+            "to": 2
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/lessons",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.4,
+          "response_key_fields": {
+            "version": 2,
+            "has_update": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/research",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.5,
+          "response_key_fields": {
+            "version": 2
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/lessons/reset",
+          "request": {},
+          "status": 200,
+          "latency_ms": 8.0,
+          "response_key_fields": {
+            "version": 1
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/research",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.9,
+          "response_key_fields": {
+            "version": 1
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "starts at version 1",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "update 1 -> 2",
+          "result": "PASS",
+          "detail": "(1, 2)"
+        },
+        {
+          "name": "now version 2",
+          "result": "PASS",
+          "detail": "2"
+        },
+        {
+          "name": "v2 has tagged new/updated topics",
+          "result": "PASS",
+          "detail": "[None, None, None, None, 'updated', None, 'new', 'new']"
+        },
+        {
+          "name": "reset back to version 1",
+          "result": "PASS",
+          "detail": "1"
+        },
+        {
+          "name": "research list: v2 shows >= v1 items",
+          "result": "PASS",
+          "detail": "v2=12 v1=7"
+        }
+      ],
+      "notes": [
+        "v1 topics=6 latest_version=3",
+        "v2 topics=8 tagged=3 changelog_entries=1",
+        "research items: v1=7 v2=12"
+      ]
+    },
+    {
+      "id": "11",
+      "description": "Receipt photo path (POST /api/scan, tiny generated JPEG stub, no ANTHROPIC_API_KEY)",
+      "ts_utc": "2026-10-19T20:12:28.094+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:28.094+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/scan",
+          "request": {
+            "image": "/9j/4AAQSkZJRgABAQAAAQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...",
+            "media_type": "image/jpeg"
+          },
+          "status": 200,
+          "latency_ms": 10.4,
+          "response_key_fields": {
+            "kind": "silent",
+            "demo": true,
+            "tx.merchant": "Hema",
+            "tx.amount_cents": 4600,
+            "tx.category": "groceries",
+            "tx.confidence": 0.92,
+            "tx.mode": "silent"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "scan returns a record (digest/ask/silent)",
+          "result": "PASS",
+          "detail": "silent"
+        },
+        {
+          "name": "result is labelled DEMO (demo: true)",
+          "result": "PASS",
+          "detail": "True"
+        }
+      ],
+      "notes": [
+        "key_was_set_in_env=False (removed from the process env for determinism); JPEG stub bytes=86",
+        "DEMO result is a fixed canned receipt; the image is NOT recognised without an LLM key"
+      ]
+    },
+    {
+      "id": "12",
+      "description": "CSV import of a small generated WeChat-style statement, twice (dedupe proof)",
+      "ts_utc": "2026-10-19T20:12:28.104+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:28.104+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/import",
+          "request": {
+            "csv": "微信支付账单明细\n微信昵称：[小雨]\n----------------------微信支付账单明细列表------..."
+          },
+          "status": 200,
+          "latency_ms": 11.7,
+          "response_key_fields": {
+            "read": 5,
+            "imported": 4,
+            "duplicates": 0,
+            "skipped": 1,
+            "silent": 4,
+            "digest": 0,
+            "ask": 0
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/import",
+          "request": {
+            "csv": "微信支付账单明细\n微信昵称：[小雨]\n----------------------微信支付账单明细列表------..."
+          },
+          "status": 200,
+          "latency_ms": 8.0,
+          "response_key_fields": {
+            "read": 5,
+            "imported": 0,
+            "duplicates": 4,
+            "skipped": 1
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "first import: 4 imported, 1 failed row skipped",
+          "result": "PASS",
+          "detail": "(4, 1)"
+        },
+        {
+          "name": "second import: 0 imported, 4 duplicates",
+          "result": "PASS",
+          "detail": "(0, 4)"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "13a",
+      "description": "Data-subject right: export (GET /api/export, counts only logged) on a fresh login that must step up first",
+      "ts_utc": "2026-10-19T20:12:28.124+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:28.124+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/logout",
+          "request": {},
+          "status": 200,
+          "latency_ms": 9.4,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "xiaoyu",
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 257.7,
+          "response_key_fields": {
+            "ok": true,
+            "username": "xiaoyu",
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/export",
+          "request": null,
+          "status": 403,
+          "latency_ms": 7.7,
+          "response_key_fields": {
+            "error": "stepup_required"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/stepup",
+          "request": {
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 269.6,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/export",
+          "request": null,
+          "status": 200,
+          "latency_ms": 10.3,
+          "response_key_fields": {
+            "exported_at": "2026-10-19T20:12:28+00:00"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "fresh login (new session carries no step-up)",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "export on the fresh session -> 403 stepup_required",
+          "result": "PASS",
+          "detail": "(403, 'stepup_required')"
+        },
+        {
+          "name": "step-up ok (200)",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "export contains transactions, goals and profile",
+          "result": "PASS",
+          "detail": "{'transactions': 376, 'goals': 3, 'merchant_memory': 19}"
+        }
+      ],
+      "notes": [
+        "export counts: {\"transactions\": 376, \"goals\": 3, \"merchant_memory\": 19} (contents deliberately not logged)"
+      ]
+    },
+    {
+      "id": "13b",
+      "description": "Data-subject right: delete all (POST /api/delete-all) and verify empty",
+      "ts_utc": "2026-10-19T20:12:28.680+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:28.680+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.4,
+          "response_key_fields": {
+            "stepup_until": 1792441048,
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/delete-all",
+          "request": {},
+          "status": 200,
+          "latency_ms": 14.2,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.5,
+          "response_key_fields": {
+            "has_data": false,
+            "tx_count": 0,
+            "goals": "<list len=0>",
+            "pending": {
+              "digest": 0,
+              "ask": 0
+            }
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/export",
+          "request": null,
+          "status": 200,
+          "latency_ms": 7.6,
+          "response_key_fields": {
+            "exported_at": "2026-10-19T20:12:28+00:00",
+            "note": "Amounts are in cents. Synthetic demo data unless you impo...",
+            "profile": {
+              "payday_day": 5,
+              "income_cents": 900000,
+              "fixed_expenses": "<list len=1>",
+              "currency": "CNY"
+            },
+            "goals": "<list len=0>",
+            "transactions": "<list len=0>",
+            "merchant_memory": "<list len=0>"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.1,
+          "response_key_fields": {
+            "consent": null,
+            "authenticated": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "Luckin 18"
+          },
+          "status": 428,
+          "latency_ms": 7.6,
+          "response_key_fields": {
+            "error": "consent_required"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/users",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.3,
+          "response_key_fields": {
+            "users": "<list len=2>"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "delete-all ok",
+          "result": "PASS",
+          "detail": "{'ok': True}"
+        },
+        {
+          "name": "account empty after delete",
+          "result": "PASS",
+          "detail": "(False, 0)"
+        },
+        {
+          "name": "export after delete: 0 transactions, 0 goals, 0 memory",
+          "result": "PASS",
+          "detail": "(0, 0, 0)"
+        },
+        {
+          "name": "erasure also removed the consent record",
+          "result": "PASS",
+          "detail": "None"
+        },
+        {
+          "name": "chat after erasure -> 428 consent_required again",
+          "result": "PASS",
+          "detail": "(428, 'consent_required')"
+        },
+        {
+          "name": "accounts (owner, judge) are kept by delete-all; only the ledger and consent are erased",
+          "result": "PASS",
+          "detail": "2"
+        }
+      ],
+      "notes": [
+        "step-up still valid (delete-all is a sensitive route); no re-authentication needed"
+      ]
+    },
+    {
+      "id": "14",
+      "description": "Negative / security probes through the same HTTP path (on a fresh login without step-up)",
+      "ts_utc": "2026-10-19T20:12:28.732+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:28.732+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/logout",
+          "request": {},
+          "status": 200,
+          "latency_ms": 9.8,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "xiaoyu",
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 252.6,
+          "response_key_fields": {
+            "ok": true,
+            "username": "xiaoyu",
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "raw_bytes": 20
+          },
+          "status": 415,
+          "latency_ms": 1.0,
+          "response_key_fields": {
+            "error": "unsupported media type"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/chat",
+          "request": {
+            "text": "Luckin 18"
+          },
+          "status": 403,
+          "latency_ms": 0.8,
+          "response_key_fields": {
+            "error": "bad_origin"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/transactions?year=abc",
+          "request": null,
+          "status": 400,
+          "latency_ms": 5.3,
+          "response_key_fields": {
+            "error": "bad_input"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 403,
+          "latency_ms": 0.9,
+          "response_key_fields": {
+            "error": "forbidden"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/nope",
+          "request": null,
+          "status": 403,
+          "latency_ms": 7.1,
+          "response_key_fields": {
+            "error": "stepup_required"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/confirm",
+          "request": {
+            "id": 1,
+            "category": "not_a_category"
+          },
+          "status": 200,
+          "latency_ms": 7.6,
+          "response_key_fields": {
+            "updated": 0
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "non-JSON content type -> 415",
+          "result": "PASS",
+          "detail": "415"
+        },
+        {
+          "name": "cross-origin POST -> 403 bad_origin (CSRF guard)",
+          "result": "PASS",
+          "detail": "(403, 'bad_origin')"
+        },
+        {
+          "name": "bad year -> 400",
+          "result": "PASS",
+          "detail": "400"
+        },
+        {
+          "name": "foreign Host header -> 403 (DNS-rebinding guard)",
+          "result": "PASS",
+          "detail": "403"
+        },
+        {
+          "name": "unknown route falls into the strictest tier -> 403 stepup_required",
+          "result": "PASS",
+          "detail": "(403, 'stepup_required')"
+        },
+        {
+          "name": "confirm with unknown id is harmless (updated 0)",
+          "result": "PASS",
+          "detail": "(200, {'updated': 0})"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "S8",
+      "description": "Guest removal (sensitive, step-up) and tamper-evident access log (GET /api/audit)",
+      "ts_utc": "2026-10-19T20:12:29.018+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:29.018+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/auth/status",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.3,
+          "response_key_fields": {
+            "stepup_until": null,
+            "role": "owner"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/stepup",
+          "request": {
+            "password": "<redacted>"
+          },
+          "status": 200,
+          "latency_ms": 255.3,
+          "response_key_fields": {
+            "ok": true,
+            "stepup_until": 1792441049
+          }
+        },
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/users/delete",
+          "request": {
+            "username": "judge"
+          },
+          "status": 200,
+          "latency_ms": 9.9,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "guest",
+          "method": "POST",
+          "path": "/api/auth/login",
+          "request": {
+            "username": "judge",
+            "password": "<redacted>"
+          },
+          "status": 401,
+          "latency_ms": 258.9,
+          "response_key_fields": {
+            "error": "invalid_credentials"
+          }
+        },
+        {
+          "client": "guest",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 401,
+          "latency_ms": 3.1,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/audit?limit=500",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.1,
+          "response_key_fields": {
+            "chain_ok": true,
+            "first_broken_id": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "guest 'judge' deleted (200)",
+          "result": "PASS",
+          "detail": "(200, {'ok': True})"
+        },
+        {
+          "name": "deleted guest can no longer sign in (401)",
+          "result": "PASS",
+          "detail": "401"
+        },
+        {
+          "name": "deleted guest's old session is dead (401)",
+          "result": "PASS",
+          "detail": "401"
+        },
+        {
+          "name": "HTTP 200 and chain_ok == true (hash chain verifies end to end)",
+          "result": "PASS",
+          "detail": "(200, True, None)"
+        },
+        {
+          "name": "log holds every action of this run (>= 60 entries, ids 1..N contiguous)",
+          "result": "PASS",
+          "detail": "entries=63 last_id=63"
+        },
+        {
+          "name": "audit contains setup / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains login / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains login / invalid_credentials",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains login / locked",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains stepup / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains stepup / invalid_password",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains POST /api/demo [denied] / error:403",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains POST /api/chat [denied] / error:428",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains POST /api/demo / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains POST /api/auth/viewer / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains GET /api/export / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains POST /api/delete-all / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "audit contains POST /api/auth/users/delete / ok",
+          "result": "PASS",
+          "detail": "present"
+        },
+        {
+          "name": "a guest's denied write is attributed to user judge, role viewer",
+          "result": "PASS",
+          "detail": "judge/viewer/[denied]"
+        },
+        {
+          "name": "no password, token or request body appears in the log",
+          "result": "PASS",
+          "detail": "scanned all entries"
+        }
+      ],
+      "notes": [
+        "step-up window had lapsed; re-authenticated (guest removal is a sensitive route)",
+        "63 audit entries; chain_ok=True; last 8 (newest first): #63 judge/- login -> invalid_credentials; #62 xiaoyu/owner POST /api/auth/users/delete -> ok; #61 xiaoyu/owner stepup -> ok; #60 xiaoyu/owner POST /api/confirm -> ok; #59 xiaoyu/owner GET /api/nope [denied] -> error:403; #58 xiaoyu/owner login -> ok; #57 xiaoyu/owner logout -> ok; #56 xiaoyu/owner POST /api/chat [denied] -> error:428"
+      ]
+    },
+    {
+      "id": "S9",
+      "description": "Tamper test on the THROWAWAY database: edit one audit row directly, chain_ok must turn false; restore, true again",
+      "ts_utc": "2026-10-19T20:12:29.555+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:29.555+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/audit?limit=5",
+          "request": null,
+          "status": 200,
+          "latency_ms": 6.1,
+          "response_key_fields": {
+            "chain_ok": false,
+            "first_broken_id": 59
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/audit?limit=5",
+          "request": null,
+          "status": 200,
+          "latency_ms": 5.5,
+          "response_key_fields": {
+            "chain_ok": true,
+            "first_broken_id": null
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "after the edit chain_ok == false and first_broken_id points at the edited row",
+          "result": "PASS",
+          "detail": "(False, 59, 59)"
+        },
+        {
+          "name": "after restoring the original value chain_ok == true again",
+          "result": "PASS",
+          "detail": "True"
+        }
+      ],
+      "notes": [
+        "row #59 (status 'error:403') was edited and restored in the temp DB only; this is a test of detection, not a claim of tamper-proof storage"
+      ]
+    },
+    {
+      "id": "S10",
+      "description": "Sign out: the session is revoked server-side",
+      "ts_utc": "2026-10-19T20:12:29.573+00:00",
+      "ts_asia_shanghai": "2026-10-20T04:12:29.573+08:00",
+      "calls": [
+        {
+          "client": "owner",
+          "method": "POST",
+          "path": "/api/auth/logout",
+          "request": {},
+          "status": 200,
+          "latency_ms": 10.0,
+          "response_key_fields": {
+            "ok": true
+          }
+        },
+        {
+          "client": "owner",
+          "method": "GET",
+          "path": "/api/state",
+          "request": null,
+          "status": 401,
+          "latency_ms": 2.9,
+          "response_key_fields": {
+            "error": "unauthenticated"
+          }
+        }
+      ],
+      "assertions": [
+        {
+          "name": "logout ok",
+          "result": "PASS",
+          "detail": "200"
+        },
+        {
+          "name": "owner's session no longer works (401)",
+          "result": "PASS",
+          "detail": "401"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "summary": {
+    "steps_run": 30,
+    "http_calls": 126,
+    "assertions_passed": 163,
+    "assertions_failed": 0,
+    "total_duration_s": 8.07,
+    "result": "PASS"
+  }
+}

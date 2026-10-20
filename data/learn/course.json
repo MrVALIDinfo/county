@@ -1,0 +1,2013 @@
+{
+ "version": 1,
+ "disclaimer": {
+  "en": "Educational only. Not personal investment advice. Licensed professionals can advise on your situation. Check any provider is licensed by the relevant regulator, and be wary of guaranteed returns. Numbers marked illustration are made up.",
+  "zh": "仅为教育，不构成个人投资建议。持牌专业人士可就你的情况提供意见。请核实机构已获相关监管部门许可，并警惕保本保收益承诺。标注“示意”的数字均为虚构。"
+ },
+ "levels": [
+  {
+   "id": "l1",
+   "order": 1,
+   "icon": "seed",
+   "en": {
+    "title": "Foundation",
+    "subtitle": "Money basics"
+   },
+   "zh": {
+    "title": "打好基础",
+    "subtitle": "金钱基本功"
+   },
+   "lessons": [
+    {
+     "id": "l1-1",
+     "xp": 10,
+     "minutes": 3,
+     "icon": "shield",
+     "en": {
+      "title": "Your emergency cushion",
+      "cards": [
+       {
+        "h": "What it is",
+        "p": "An emergency cushion is cash kept for surprises: lost income, medical bills, urgent repairs. It is not for investing."
+       },
+       {
+        "h": "How big?",
+        "p": "A common rule of thumb: 3 to 6 months of must-pay costs. Illustration: ¥3,000 a month means about ¥9,000 to ¥18,000."
+       },
+       {
+        "h": "Where to keep it",
+        "p": "Keep it easy to reach and low in risk. Money that can fall in value, or be locked up, does this job badly."
+       },
+       {
+        "h": "Why first",
+        "p": "Without a cushion, a surprise can force you to sell investments at a bad time. Build it first. Education, not personal advice."
+       }
+      ]
+     },
+     "zh": {
+      "title": "应急备用金",
+      "cards": [
+       {
+        "h": "是什么",
+        "p": "应急备用金是留给意外的现金：收入中断、医疗费、紧急维修。它不是用来投资的。"
+       },
+       {
+        "h": "多少合适",
+        "p": "常见经验：覆盖 3 到 6 个月的必要开支。示意：每月 ¥3,000，约需 ¥9,000 到 ¥18,000。"
+       },
+       {
+        "h": "放在哪",
+        "p": "要随时能取、风险低。可能亏损或被锁定的钱，不适合做备用金。"
+       },
+       {
+        "h": "为何先做",
+        "p": "没有备用金，意外可能逼你在不利时卖出投资。所以先做它。仅为教育，不是个人建议。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "What is an emergency cushion for?",
+        "zh": "应急备用金是用来做什么的？"
+       },
+       "options": [
+        {
+         "en": "Chasing high returns",
+         "zh": "追逐高收益"
+        },
+        {
+         "en": "Buying things on sale",
+         "zh": "抢购打折商品"
+        },
+        {
+         "en": "Unexpected costs like medical bills or lost income",
+         "zh": "应对医疗费、收入中断等意外支出"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "It is a safety net for surprises, not a way to earn returns.",
+        "zh": "它是应对意外的安全网，不是赚收益的工具。"
+       }
+      },
+      {
+       "q": {
+        "en": "Illustration: costs are ¥4,000 a month. How much is a 3-month cushion?",
+        "zh": "示意：每月开支 ¥4,000。3 个月备用金是多少？"
+       },
+       "options": [
+        {
+         "en": "¥12,000",
+         "zh": "¥12,000"
+        },
+        {
+         "en": "¥4,000",
+         "zh": "¥4,000"
+        },
+        {
+         "en": "¥7,000",
+         "zh": "¥7,000"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "3 months × ¥4,000 = ¥12,000.",
+        "zh": "3 个月 × ¥4,000 = ¥12,000。"
+       }
+      },
+      {
+       "q": {
+        "en": "What suits cushion money best?",
+        "zh": "哪种特点最适合备用金？"
+       },
+       "options": [
+        {
+         "en": "The highest possible return",
+         "zh": "尽可能高的收益"
+        },
+        {
+         "en": "Easy to access and low risk",
+         "zh": "随时可取、风险低"
+        },
+        {
+         "en": "Locked away for years",
+         "zh": "锁定好几年"
+        },
+        {
+         "en": "Whatever your friends use",
+         "zh": "朋友都在用的"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Its job is to be there when needed, at full value.",
+        "zh": "它的任务是需要时就在，且不缩水。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l1-2",
+     "xp": 10,
+     "minutes": 3,
+     "icon": "coins",
+     "en": {
+      "title": "Saving vs investing",
+      "cards": [
+       {
+        "h": "Saving",
+        "p": "Saving means setting money aside, usually for near goals. The aim is that your money stays safe and ready."
+       },
+       {
+        "h": "Investing",
+        "p": "Investing means putting money into things whose value can rise or fall. Gains are possible. So are losses."
+       },
+       {
+        "h": "Different jobs",
+        "p": "Neither is better. A goal within a year or two points to saving. A goal many years away leaves more room to consider investing."
+       },
+       {
+        "h": "Keep it clear",
+        "p": "Know which bucket each yuan belongs to. This is general education, not personal investment advice. Licensed professionals can help with your case."
+       }
+      ]
+     },
+     "zh": {
+      "title": "储蓄与投资",
+      "cards": [
+       {
+        "h": "储蓄",
+        "p": "储蓄是把钱留出来，通常为近期目标。目的是让钱安全、随时可用。"
+       },
+       {
+        "h": "投资",
+        "p": "投资是把钱放进价值会涨也会跌的东西里。可能有收益，也可能亏损。"
+       },
+       {
+        "h": "各有用处",
+        "p": "没有谁更好。一两年内的目标，更适合储蓄；很多年后的目标，才有空间考虑投资。"
+       },
+       {
+        "h": "分清楚",
+        "p": "每一块钱都要知道属于哪个“桶”。这是通用教育，不是个人投资建议。持牌专业人士可以帮你具体分析。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "Which one can lose value?",
+        "zh": "哪一种可能亏损？"
+       },
+       "options": [
+        {
+         "en": "Keeping cash for next month's rent",
+         "zh": "留着下月房租的现金"
+        },
+        {
+         "en": "A plain savings plan with money you may need soon",
+         "zh": "为近期用钱做的普通储蓄"
+        },
+        {
+         "en": "Investing",
+         "zh": "投资"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "Investment values move up and down, so losses are possible.",
+        "zh": "投资价值会涨跌，所以可能亏损。"
+       }
+      },
+      {
+       "q": {
+        "en": "Rent is due in 3 months. Which tool type fits that money?",
+        "zh": "3 个月后要交房租。这笔钱适合哪类工具？"
+       },
+       "options": [
+        {
+         "en": "Investing",
+         "zh": "投资"
+        },
+        {
+         "en": "Saving",
+         "zh": "储蓄"
+        },
+        {
+         "en": "Either, it makes no difference",
+         "zh": "都行，没区别"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "A near, fixed need calls for safety and access.",
+        "zh": "近期的固定支出，需要安全和随时可取。"
+       }
+      },
+      {
+       "q": {
+        "en": "Saving and investing are...",
+        "zh": "储蓄和投资是……"
+       },
+       "options": [
+        {
+         "en": "Different tools for different goals",
+         "zh": "服务不同目标的不同工具"
+        },
+        {
+         "en": "Exactly the same",
+         "zh": "完全一样"
+        },
+        {
+         "en": "Two names for guaranteed profit",
+         "zh": "“保证盈利”的两种叫法"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "Each fits a different time frame and risk level.",
+        "zh": "各自适合不同的期限和风险。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l1-3",
+     "xp": 10,
+     "minutes": 3,
+     "icon": "gauge",
+     "en": {
+      "title": "Risk and return",
+      "cards": [
+       {
+        "h": "Risk",
+        "p": "Risk is the chance that results differ from what you expected. That includes losing money."
+       },
+       {
+        "h": "Return",
+        "p": "Return is what you gain or lose on your money over time. It can be positive or negative."
+       },
+       {
+        "h": "The trade-off",
+        "p": "Higher possible return usually comes with higher risk. No honest provider can break that link."
+       },
+       {
+        "h": "Red flag",
+        "p": "High return with no risk? Guaranteed? Be wary. In China, check the provider is licensed by the relevant regulator."
+       }
+      ]
+     },
+     "zh": {
+      "title": "风险与收益",
+      "cards": [
+       {
+        "h": "风险",
+        "p": "风险是结果与预期不同的可能，其中包括亏钱。"
+       },
+       {
+        "h": "收益",
+        "p": "收益是你的钱在一段时间内的得与失。可能为正，也可能为负。"
+       },
+       {
+        "h": "此消彼长",
+        "p": "更高的潜在收益，通常伴随更高的风险。诚信的机构不可能打破这个规律。"
+       },
+       {
+        "h": "危险信号",
+        "p": "高收益还零风险？承诺保本保收益？要警惕。在中国，请核实机构已获相关监管部门许可。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "A product promises guaranteed high returns with zero risk. Best reaction?",
+        "zh": "某产品承诺“保证高收益、零风险”。最佳反应是？"
+       },
+       "options": [
+        {
+         "en": "Join quickly before it closes",
+         "zh": "赶紧加入，免得错过"
+        },
+        {
+         "en": "Tell friends to join too",
+         "zh": "叫朋友一起加入"
+        },
+        {
+         "en": "Be suspicious and verify the licence",
+         "zh": "保持怀疑，并核实牌照"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "High return and no risk together is a classic warning sign.",
+        "zh": "高收益加零风险，是典型的警示信号。"
+       }
+      },
+      {
+       "q": {
+        "en": "Higher potential return usually means...",
+        "zh": "更高的潜在收益通常意味着……"
+       },
+       "options": [
+        {
+         "en": "Higher risk",
+         "zh": "更高的风险"
+        },
+        {
+         "en": "Lower risk",
+         "zh": "更低的风险"
+        },
+        {
+         "en": "No risk",
+         "zh": "没有风险"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "Risk and potential return tend to rise together.",
+        "zh": "风险与潜在收益往往同升同降。"
+       }
+      },
+      {
+       "q": {
+        "en": "Which best describes risk?",
+        "zh": "哪项最能描述风险？"
+       },
+       "options": [
+        {
+         "en": "Results may differ from expectations, including losses",
+         "zh": "结果可能与预期不同，包括亏损"
+        },
+        {
+         "en": "Only losing everything",
+         "zh": "只有血本无归"
+        },
+        {
+         "en": "Something that only happens to others",
+         "zh": "只会发生在别人身上"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "Risk covers any gap from expectations, not only total loss.",
+        "zh": "风险指任何偏离预期的可能，不只是全亏。"
+       }
+      }
+     ]
+    }
+   ],
+   "playbook": {
+    "en": {
+     "title": "Starter playbook",
+     "intro": "How people often begin: protect first, learn next. Educational only, not personal investment advice. Licensed professionals can help with your case.",
+     "steps": [
+      {
+       "h": "List your must-pay costs",
+       "p": "Write down rent, food, bills and debt payments. This number sizes everything else."
+      },
+      {
+       "h": "Build the cushion",
+       "p": "Aim for several months of must-pay costs in easy-to-reach, low-risk form before taking investment risk."
+      },
+      {
+       "h": "Name goals and dates",
+       "p": "Each goal gets an amount and a date. Dates decide how much risk is sensible."
+      },
+      {
+       "h": "Learn before you buy",
+       "p": "If you cannot explain a product in two sentences, wait. Ask questions first."
+      },
+      {
+       "h": "Check the licence",
+       "p": "Confirm any provider is licensed by the relevant regulator. Ignore guaranteed-return promises."
+      }
+     ],
+     "checklist": [
+      "Know my monthly must-pay costs",
+      "Cushion built before investing",
+      "Every goal has an amount and date",
+      "I can explain the product simply",
+      "Provider licence checked"
+     ],
+     "illustration": {
+      "label": "Illustration only, not a recommendation: money with short horizons",
+      "rows": [
+       {
+        "name": "Cash / deposits",
+        "pct": 75
+       },
+       {
+        "name": "Bonds",
+        "pct": 20
+       },
+       {
+        "name": "Diversified equity funds",
+        "pct": 5
+       }
+      ]
+     }
+    },
+    "zh": {
+     "title": "入门手册",
+     "intro": "常见起步方式：先保护，再学习。仅为教育，不是个人投资建议。持牌专业人士可就你的情况提供帮助。",
+     "steps": [
+      {
+       "h": "先列必要开支",
+       "p": "写下房租、饮食、账单和还款。这个数决定后面的一切。"
+      },
+      {
+       "h": "做好备用金",
+       "p": "先攒出数月必要开支，放在易取、低风险处，再考虑承担投资风险。"
+      },
+      {
+       "h": "写下目标和日期",
+       "p": "每个目标都有金额和日期。日期决定多大风险才合理。"
+      },
+      {
+       "h": "先懂再买",
+       "p": "如果你不能用两句话讲清一个产品，就先等等。先提问。"
+      },
+      {
+       "h": "核实牌照",
+       "p": "确认机构已获相关监管部门许可。无视保本保收益的承诺。"
+      }
+     ],
+     "checklist": [
+      "知道每月必要开支",
+      "投资前先有备用金",
+      "每个目标有金额和日期",
+      "我能简单讲清产品",
+      "已核实机构牌照"
+     ],
+     "illustration": {
+      "label": "仅为示意，不构成建议：适用于短期资金",
+      "rows": [
+       {
+        "name": "现金 / 存款",
+        "pct": 75
+       },
+       {
+        "name": "债券",
+        "pct": 20
+       },
+       {
+        "name": "分散型股票基金",
+        "pct": 5
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "l2",
+   "order": 2,
+   "icon": "sprout",
+   "en": {
+    "title": "Building",
+    "subtitle": "Spread and match"
+   },
+   "zh": {
+    "title": "稳步搭建",
+    "subtitle": "分散与匹配"
+   },
+   "lessons": [
+    {
+     "id": "l2-1",
+     "xp": 15,
+     "minutes": 4,
+     "icon": "layers",
+     "en": {
+      "title": "Diversification",
+      "cards": [
+       {
+        "h": "The idea",
+        "p": "Diversification means spreading money across different things, so one failure hurts less."
+       },
+       {
+        "h": "More is not always varied",
+        "p": "Ten things that move together are not diversified. Look for different kinds of assets, industries and places."
+       },
+       {
+        "h": "Its limits",
+        "p": "It can reduce one kind of risk. It cannot remove all risk or guarantee you never lose."
+       },
+       {
+        "h": "A useful question",
+        "p": "Ask: if my biggest holding fell sharply, how much of my total would it hit?"
+       }
+      ]
+     },
+     "zh": {
+      "title": "分散配置",
+      "cards": [
+       {
+        "h": "核心思想",
+        "p": "分散配置，就是把钱分到不同的东西上，这样一处出问题，损失更小。"
+       },
+       {
+        "h": "多不等于分散",
+        "p": "十个同涨同跌的东西并不分散。要看资产类型、行业和地区是否不同。"
+       },
+       {
+        "h": "它的局限",
+        "p": "它能降低某一类风险，但不能消除全部风险，也不能保证不亏。"
+       },
+       {
+        "h": "问自己",
+        "p": "问问：如果我最大的一笔大跌，会拖累我总资产的多少？"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "What is diversification mainly for?",
+        "zh": "分散配置主要是为了什么？"
+       },
+       "options": [
+        {
+         "en": "Reducing the damage if one holding does badly",
+         "zh": "降低某一项表现差时的冲击"
+        },
+        {
+         "en": "Guaranteeing a profit",
+         "zh": "保证盈利"
+        },
+        {
+         "en": "Picking the single best winner",
+         "zh": "选出唯一的赢家"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "It spreads risk. It does not promise profit.",
+        "zh": "它分散风险，并不承诺盈利。"
+       }
+      },
+      {
+       "q": {
+        "en": "Which mix is more diversified?",
+        "zh": "哪种组合更分散？"
+       },
+       "options": [
+        {
+         "en": "Five companies in the same industry",
+         "zh": "同一行业的五家公司"
+        },
+        {
+         "en": "Different kinds of assets in different industries",
+         "zh": "不同行业的不同类型资产"
+        },
+        {
+         "en": "One company you know well",
+         "zh": "一家你很熟的公司"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Variety in type and source matters more than count.",
+        "zh": "类型和来源的差异，比数量更重要。"
+       }
+      },
+      {
+       "q": {
+        "en": "Diversification can...",
+        "zh": "分散配置可以……"
+       },
+       "options": [
+        {
+         "en": "Reduce risk, but not remove it",
+         "zh": "降低风险，但无法消除"
+        },
+        {
+         "en": "Remove all risk",
+         "zh": "消除所有风险"
+        },
+        {
+         "en": "Make losses impossible",
+         "zh": "让亏损不可能发生"
+        },
+        {
+         "en": "Replace a cushion",
+         "zh": "取代备用金"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "Some risks hit everything at once.",
+        "zh": "有些风险会同时影响所有东西。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l2-2",
+     "xp": 15,
+     "minutes": 4,
+     "icon": "chart",
+     "en": {
+      "title": "Match money to time",
+      "cards": [
+       {
+        "h": "Time horizon",
+        "p": "Your horizon is when you will need the money. Every goal has its own."
+       },
+       {
+        "h": "Short horizon",
+        "p": "Needed within about 1 to 3 years? Stability matters. A drop may not have time to recover."
+       },
+       {
+        "h": "Long horizon",
+        "p": "Needed in 10+ years? There is more time to wait out ups and downs. Still, nothing is guaranteed."
+       },
+       {
+        "h": "One goal, one pot",
+        "p": "Do not mix rent money with retirement money. Give each goal its own pot and its own risk level."
+       }
+      ]
+     },
+     "zh": {
+      "title": "钱与期限匹配",
+      "cards": [
+       {
+        "h": "投资期限",
+        "p": "期限就是你什么时候要用这笔钱。每个目标都有自己的期限。"
+       },
+       {
+        "h": "短期",
+        "p": "1 到 3 年内要用？稳定最重要。下跌后可能来不及恢复。"
+       },
+       {
+        "h": "长期",
+        "p": "10 年以上才用？有更多时间熬过起伏。但依然没有任何保证。"
+       },
+       {
+        "h": "一个目标，一个账户",
+        "p": "别把房租钱和养老钱混在一起。每个目标有自己的“钱袋”和风险水平。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "Tuition is due in 1 year. What matters most for that money?",
+        "zh": "一年后要交学费。这笔钱最看重什么？"
+       },
+       "options": [
+        {
+         "en": "Stability and access",
+         "zh": "稳定和可取用"
+        },
+        {
+         "en": "The highest possible return",
+         "zh": "尽可能高的收益"
+        },
+        {
+         "en": "Locking it for 10 years",
+         "zh": "锁定 10 年"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "A short horizon leaves little time to recover from a drop.",
+        "zh": "期限短，下跌后几乎没时间恢复。"
+       }
+      },
+      {
+       "q": {
+        "en": "Why match money to its goal date?",
+        "zh": "为什么要让钱与目标日期匹配？"
+       },
+       "options": [
+        {
+         "en": "It guarantees growth",
+         "zh": "它能保证增值"
+        },
+        {
+         "en": "It removes all fees",
+         "zh": "它能免掉所有费用"
+        },
+        {
+         "en": "A drop is harder to wait out if you need the money soon",
+         "zh": "马上要用钱时，下跌更难熬过去"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "Time is what lets you sit through falls.",
+        "zh": "时间让你有机会熬过下跌。"
+       }
+      },
+      {
+       "q": {
+        "en": "Retirement is 25 years away. Which statement is true?",
+        "zh": "距退休还有 25 年。哪句话正确？"
+       },
+       "options": [
+        {
+         "en": "Growth is guaranteed",
+         "zh": "增长是有保证的"
+        },
+        {
+         "en": "More time to wait out drops, but no guarantees",
+         "zh": "有更多时间熬过下跌，但无保证"
+        },
+        {
+         "en": "Horizon does not matter",
+         "zh": "期限不重要"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Time helps, but cannot remove risk.",
+        "zh": "时间有帮助，但不能消除风险。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l2-3",
+     "xp": 15,
+     "minutes": 4,
+     "icon": "coins",
+     "en": {
+      "title": "Fees, compounding, regular investing",
+      "cards": [
+       {
+        "h": "Fees add up",
+        "p": "Fees are usually charged even when value falls. Illustration: a 2% yearly fee on ¥10,000 is ¥200 a year."
+       },
+       {
+        "h": "Compounding",
+        "p": "Earnings can earn more earnings. Illustration only: ¥1,000 growing 5% a year becomes about ¥1,629 in 10 years. Real results vary."
+       },
+       {
+        "h": "Investing regularly",
+        "p": "Putting in a fixed amount on a schedule is called dollar-cost averaging. It spreads out your buying times."
+       },
+       {
+        "h": "What it cannot do",
+        "p": "Illustration: ¥500 monthly at prices 10, 5, 10 buys 200 units, average cost 7.5. It does not guarantee profit or prevent loss."
+       }
+      ]
+     },
+     "zh": {
+      "title": "费用、复利与定期投资",
+      "cards": [
+       {
+        "h": "费用会累积",
+        "p": "费用通常在价值下跌时也要收。示意：¥10,000 的 2% 年费，就是每年 ¥200。"
+       },
+       {
+        "h": "复利",
+        "p": "收益还能再产生收益。仅为示意：¥1,000 每年增长 5%，10 年约 ¥1,629。真实结果会变化。"
+       },
+       {
+        "h": "定期投资",
+        "p": "按固定日期投入固定金额，叫定投。它把买入时间分散开。"
+       },
+       {
+        "h": "它做不到",
+        "p": "示意：每月 ¥500，价格 10、5、10，共买 200 份，均价 7.5。它不保证盈利，也不能避免亏损。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "Fees are usually charged...",
+        "zh": "费用通常会……"
+       },
+       "options": [
+        {
+         "en": "Only when you profit",
+         "zh": "只在你盈利时收"
+        },
+        {
+         "en": "Even in years when value falls",
+         "zh": "在价值下跌的年份也照收"
+        },
+        {
+         "en": "Never",
+         "zh": "从不收取"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Check every fee in yuan, not just percentages.",
+        "zh": "要把每项费用换算成元来看，不只看百分比。"
+       }
+      },
+      {
+       "q": {
+        "en": "What is compounding?",
+        "zh": "什么是复利？"
+       },
+       "options": [
+        {
+         "en": "A fee on every deposit",
+         "zh": "每次存入都收的费用"
+        },
+        {
+         "en": "Earnings that themselves earn more over time",
+         "zh": "收益本身随时间继续产生收益"
+        },
+        {
+         "en": "A promise of fixed profit",
+         "zh": "固定盈利的承诺"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Growth builds on past growth. Rates are never guaranteed.",
+        "zh": "增长叠加在过去的增长上。收益率从无保证。"
+       }
+      },
+      {
+       "q": {
+        "en": "Regular investing means...",
+        "zh": "定期投资是指……"
+       },
+       "options": [
+        {
+         "en": "Waiting for the perfect price",
+         "zh": "等待完美的价格"
+        },
+        {
+         "en": "Investing a fixed amount on a schedule",
+         "zh": "按计划定期投入固定金额"
+        },
+        {
+         "en": "Guaranteeing no loss",
+         "zh": "保证不亏"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "It sets a habit. It does not remove market risk.",
+        "zh": "它帮你养成习惯，但不消除市场风险。"
+       }
+      }
+     ]
+    }
+   ],
+   "playbook": {
+    "en": {
+     "title": "Builder playbook",
+     "intro": "How people often build up: goals first, then a simple, spread-out plan. Educational only, not personal investment advice. Licensed professionals exist.",
+     "steps": [
+      {
+       "h": "Sort goals by date",
+       "p": "Split goals into near (under 3 years) and far. Near goals lean toward stability."
+      },
+      {
+       "h": "Spread across types",
+       "p": "Look at kinds of assets, not product count. Ask what moves together."
+      },
+      {
+       "h": "Add up every fee",
+       "p": "Ask for buy, yearly and sell fees. Convert them to yuan per year."
+      },
+      {
+       "h": "Invest on a schedule",
+       "p": "A fixed monthly amount builds habit. It does not promise profit."
+      },
+      {
+       "h": "Write it down",
+       "p": "Note the goal, amount, date and why. Review on a calendar, not on headlines."
+      }
+     ],
+     "checklist": [
+      "Goals split into near and far",
+      "Not everything moves together",
+      "All fees listed in yuan",
+      "Regular amount I can sustain",
+      "No guaranteed-return promises accepted"
+     ],
+     "illustration": {
+      "label": "Illustration only, not a recommendation: medium horizons",
+      "rows": [
+       {
+        "name": "Cash / deposits",
+        "pct": 40
+       },
+       {
+        "name": "Bonds",
+        "pct": 30
+       },
+       {
+        "name": "Diversified equity funds",
+        "pct": 25
+       },
+       {
+        "name": "Other",
+        "pct": 5
+       }
+      ]
+     }
+    },
+    "zh": {
+     "title": "进阶手册",
+     "intro": "常见做法：先定目标，再做简单、分散的计划。仅为教育，不是个人投资建议。持牌专业人士可提供帮助。",
+     "steps": [
+      {
+       "h": "按日期排目标",
+       "p": "把目标分成近期（3 年内）和远期。近期目标偏向稳定。"
+      },
+      {
+       "h": "跨类型分散",
+       "p": "看资产类型，不看产品数量。问问哪些东西同涨同跌。"
+      },
+      {
+       "h": "算清所有费用",
+       "p": "问清买入、年度和卖出费用，并折算成每年多少元。"
+      },
+      {
+       "h": "按计划投入",
+       "p": "每月固定金额有助养成习惯，但不承诺盈利。"
+      },
+      {
+       "h": "写成计划",
+       "p": "记下目标、金额、日期和理由。按日历复查，别被新闻牵着走。"
+      }
+     ],
+     "checklist": [
+      "目标已分近期和远期",
+      "不是全都同涨同跌",
+      "所有费用已折算成元",
+      "金额是我能长期坚持的",
+      "不接受保本保收益承诺"
+     ],
+     "illustration": {
+      "label": "仅为示意，不构成建议：适用于中期资金",
+      "rows": [
+       {
+        "name": "现金 / 存款",
+        "pct": 40
+       },
+       {
+        "name": "债券",
+        "pct": 30
+       },
+       {
+        "name": "分散型股票基金",
+        "pct": 25
+       },
+       {
+        "name": "其他",
+        "pct": 5
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "l3",
+   "order": 3,
+   "icon": "tree",
+   "en": {
+    "title": "Strategy",
+    "subtitle": "Plan and read products"
+   },
+   "zh": {
+    "title": "策略进阶",
+    "subtitle": "做计划、读产品"
+   },
+   "lessons": [
+    {
+     "id": "l3-1",
+     "xp": 20,
+     "minutes": 4,
+     "icon": "gauge",
+     "en": {
+      "title": "Asset allocation and risk tolerance",
+      "cards": [
+       {
+        "h": "Allocation",
+        "p": "Asset allocation is how you split money between categories: cash and deposits, bonds, equity funds, other."
+       },
+       {
+        "h": "Why it comes first",
+        "p": "The split often matters more than picking single items. Many professionals start here."
+       },
+       {
+        "h": "Risk tolerance",
+        "p": "It has two parts. Ability: stable income, a cushion, a long horizon. Willingness: how you feel when value drops."
+       },
+       {
+        "h": "Write it down",
+        "p": "Record your split and your reason. Review on a schedule, not on news. Educational only, not personal advice."
+       }
+      ]
+     },
+     "zh": {
+      "title": "资产配置与风险承受力",
+      "cards": [
+       {
+        "h": "资产配置",
+        "p": "资产配置，就是把钱在不同类别间分配：现金存款、债券、股票基金、其他。"
+       },
+       {
+        "h": "为何先看它",
+        "p": "整体比例，往往比挑单个产品更重要。很多专业人士从这里入手。"
+       },
+       {
+        "h": "风险承受力",
+        "p": "它有两部分。能力：收入稳定、有备用金、期限长。意愿：价值下跌时你的感受。"
+       },
+       {
+        "h": "写下来",
+        "p": "记录比例和理由，按计划复查，别看新闻就改。仅为教育，不是个人建议。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "What is asset allocation?",
+        "zh": "什么是资产配置？"
+       },
+       "options": [
+        {
+         "en": "Picking one winning product",
+         "zh": "挑出一个会赢的产品"
+        },
+        {
+         "en": "Timing the market",
+         "zh": "预测市场时点"
+        },
+        {
+         "en": "How money is split across asset categories",
+         "zh": "把钱在各资产类别间的分配"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "It is the overall mix, before choosing details.",
+        "zh": "它是整体组合，先于具体选择。"
+       }
+      },
+      {
+       "q": {
+        "en": "Risk tolerance includes...",
+        "zh": "风险承受力包括……"
+       },
+       "options": [
+        {
+         "en": "Only your age",
+         "zh": "只看年龄"
+        },
+        {
+         "en": "Only what friends do",
+         "zh": "只看朋友怎么做"
+        },
+        {
+         "en": "Both ability and willingness to take losses",
+         "zh": "承担亏损的能力和意愿两方面"
+        },
+        {
+         "en": "Only past returns",
+         "zh": "只看过去收益"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "You need to afford a loss and also stay calm through it.",
+        "zh": "既要承受得起，也要能保持冷静。"
+       }
+      },
+      {
+       "q": {
+        "en": "Illustration: someone panics at small drops and needs money in 2 years. Often considered?",
+        "zh": "示意：某人小幅下跌就慌，且 2 年内要用钱。常见考虑是？"
+       },
+       "options": [
+        {
+         "en": "A riskier split",
+         "zh": "更激进的比例"
+        },
+        {
+         "en": "A more cautious split",
+         "zh": "更谨慎的比例"
+        },
+        {
+         "en": "No plan at all",
+         "zh": "完全不做计划"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Short horizon and low willingness both point to caution.",
+        "zh": "期限短、意愿低，都指向更谨慎。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l3-2",
+     "xp": 20,
+     "minutes": 4,
+     "icon": "layers",
+     "en": {
+      "title": "Rebalancing",
+      "cards": [
+       {
+        "h": "Drift",
+        "p": "Markets move, so your split drifts from plan. Illustration: a 60/40 plan can become 70/30."
+       },
+       {
+        "h": "What rebalancing is",
+        "p": "Bringing the split back toward plan. You can add new money to the smaller part, or sell some of the part that grew."
+       },
+       {
+        "h": "Rules, not feelings",
+        "p": "Set a rule in advance: by calendar, such as yearly, or by band, such as off by 5 points. Count fees and taxes."
+       },
+       {
+        "h": "Its purpose",
+        "p": "It keeps risk near your plan. It is not a way to predict markets."
+       }
+      ]
+     },
+     "zh": {
+      "title": "再平衡",
+      "cards": [
+       {
+        "h": "比例漂移",
+        "p": "市场波动，会让比例偏离计划。示意：60/40 的计划可能变成 70/30。"
+       },
+       {
+        "h": "什么是再平衡",
+        "p": "把比例拉回计划。可以把新钱投向占比变小的部分，或卖出一部分涨多了的。"
+       },
+       {
+        "h": "靠规则",
+        "p": "提前定规则：按日历（如每年一次），或按偏离幅度（如差 5 个百分点）。要算上费用和税。"
+       },
+       {
+        "h": "目的",
+        "p": "它让风险保持在计划附近，并不是预测市场的方法。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "Why does a split drift?",
+        "zh": "为什么比例会漂移？"
+       },
+       "options": [
+        {
+         "en": "Different parts move by different amounts",
+         "zh": "不同部分涨跌幅度不同"
+        },
+        {
+         "en": "Providers change it secretly",
+         "zh": "机构偷偷改动"
+        },
+        {
+         "en": "It never drifts",
+         "zh": "它从不漂移"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "Parts that grow faster take a bigger share.",
+        "zh": "涨得快的部分占比会变大。"
+       }
+      },
+      {
+       "q": {
+        "en": "Rebalancing aims to...",
+        "zh": "再平衡的目的是……"
+       },
+       "options": [
+        {
+         "en": "Predict the next rise",
+         "zh": "预测下一次上涨"
+        },
+        {
+         "en": "Guarantee profit",
+         "zh": "保证盈利"
+        },
+        {
+         "en": "Keep risk close to your plan",
+         "zh": "让风险贴近你的计划"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "It manages risk. It does not forecast.",
+        "zh": "它管理风险，不做预测。"
+       }
+      },
+      {
+       "q": {
+        "en": "Which is a rule set in advance?",
+        "zh": "哪项是提前定好的规则？"
+       },
+       "options": [
+        {
+         "en": "Check once a year and act if off by more than a set gap",
+         "zh": "每年检查一次，偏离超过设定幅度才行动"
+        },
+        {
+         "en": "Act when headlines look scary",
+         "zh": "标题吓人时就动手"
+        },
+        {
+         "en": "Copy what a friend does this week",
+         "zh": "照抄朋友本周的做法"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "A pre-set rule keeps emotions out.",
+        "zh": "提前定好规则，能避开情绪。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l3-3",
+     "xp": 20,
+     "minutes": 5,
+     "icon": "sparkles",
+     "en": {
+      "title": "What is this product?",
+      "cards": [
+       {
+        "h": "Know the type",
+        "p": "A fund pools many people's money into one basket. A bond is a loan to a borrower for interest. A deposit is money placed with a bank."
+       },
+       {
+        "h": "Fees and holdings",
+        "p": "Ask for every fee, in yuan per year. Ask what it holds, in plain words."
+       },
+       {
+        "h": "Risks and liquidity",
+        "p": "What can go wrong: price falls, borrower fails to repay, rules change? How fast can you take money out, and at what cost?"
+       },
+       {
+        "h": "Licence and promises",
+        "p": "Confirm the provider and product are licensed or registered with the relevant regulator. Be wary of guaranteed returns. Licensed advisers exist."
+       }
+      ]
+     },
+     "zh": {
+      "title": "读懂一个产品",
+      "cards": [
+       {
+        "h": "先认类型",
+        "p": "基金把许多人的钱放进一个篮子。债券是借给借款人并收利息。存款是把钱存进银行。"
+       },
+       {
+        "h": "费用与持仓",
+        "p": "问清每项费用，折算成每年多少元。再问它到底持有什么，要说人话。"
+       },
+       {
+        "h": "风险与流动性",
+        "p": "可能出什么问题：价格下跌、借款人违约、规则变化？多快能取出，代价多大？"
+       },
+       {
+        "h": "牌照与承诺",
+        "p": "确认机构和产品已获相关监管部门许可或备案。警惕保本保收益。持牌顾问可提供帮助。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "What is a bond?",
+        "zh": "债券是什么？"
+       },
+       "options": [
+        {
+         "en": "A loan to a borrower, paid back with interest",
+         "zh": "借给借款人、连本带息偿还的借款"
+        },
+        {
+         "en": "A share of company ownership",
+         "zh": "公司股权的一部分"
+        },
+        {
+         "en": "A free bank bonus",
+         "zh": "银行送的奖励"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "The borrower owes you repayment, though it can fail to pay.",
+        "zh": "借款人欠你还款，但也可能违约。"
+       }
+      },
+      {
+       "q": {
+        "en": "Before buying, what should you check?",
+        "zh": "买之前该检查什么？"
+       },
+       "options": [
+        {
+         "en": "Only last year's return",
+         "zh": "只看去年的收益"
+        },
+        {
+         "en": "Fees, holdings, risks and how easily you can withdraw",
+         "zh": "费用、持仓、风险，以及取出是否方便"
+        },
+        {
+         "en": "Only how good the ad looks",
+         "zh": "只看广告好不好看"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Past returns and ads say little about what you are buying.",
+        "zh": "过去收益和广告，说明不了你买的是什么。"
+       }
+      },
+      {
+       "q": {
+        "en": "A seller promises a guaranteed high return. You should...",
+        "zh": "销售承诺保证高收益。你应该……"
+       },
+       "options": [
+        {
+         "en": "Trust it if they seem friendly",
+         "zh": "对方友善就相信"
+        },
+        {
+         "en": "Transfer money to lock the rate",
+         "zh": "先转钱锁定利率"
+        },
+        {
+         "en": "Verify the licence with the regulator and stay cautious",
+         "zh": "向监管部门核实牌照，保持谨慎"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "Guarantees plus pressure are warning signs.",
+        "zh": "保证加催促，是警示信号。"
+       }
+      }
+     ]
+    }
+   ],
+   "playbook": {
+    "en": {
+     "title": "Strategy playbook",
+     "intro": "How people often plan: set a split, write rules, then review on a schedule. Educational only, not personal investment advice. Licensed advisers exist.",
+     "steps": [
+      {
+       "h": "Rate your tolerance",
+       "p": "Score ability (income, cushion, horizon) and willingness (how a 20% drop feels)."
+      },
+      {
+       "h": "Pick category shares",
+       "p": "Choose shares by category: cash, bonds, equity funds, other. Detail comes later."
+      },
+      {
+       "h": "Set rebalancing rules",
+       "p": "Choose a calendar or a band. Write it before markets move."
+      },
+      {
+       "h": "Interrogate each product",
+       "p": "Fees, holdings, risks, liquidity. Get answers in writing."
+      },
+      {
+       "h": "Review on schedule",
+       "p": "Look at the plan once or twice a year, or when life changes. Not on headlines."
+      }
+     ],
+     "checklist": [
+      "Tolerance scored, not guessed",
+      "Split written by category",
+      "Rebalancing rule set in advance",
+      "Liquidity and lock-ups understood",
+      "Regulator licence verified"
+     ],
+     "illustration": {
+      "label": "Illustration only, not a recommendation: longer horizons",
+      "rows": [
+       {
+        "name": "Cash / deposits",
+        "pct": 25
+       },
+       {
+        "name": "Bonds",
+        "pct": 30
+       },
+       {
+        "name": "Diversified equity funds",
+        "pct": 40
+       },
+       {
+        "name": "Other",
+        "pct": 5
+       }
+      ]
+     }
+    },
+    "zh": {
+     "title": "策略手册",
+     "intro": "常见做法：定比例、写规则、按计划复查。仅为教育，不是个人投资建议。持牌顾问可提供帮助。",
+     "steps": [
+      {
+       "h": "评估承受力",
+       "p": "评估能力（收入、备用金、期限）和意愿（跌 20% 时的感受）。"
+      },
+      {
+       "h": "定类别比例",
+       "p": "按类别定比例：现金、债券、股票基金、其他。细节以后再说。"
+      },
+      {
+       "h": "定再平衡规则",
+       "p": "选日历式或偏离幅度式。在市场波动前就写好。"
+      },
+      {
+       "h": "逐个审视产品",
+       "p": "费用、持仓、风险、流动性。让对方书面回答。"
+      },
+      {
+       "h": "按计划复查",
+       "p": "每年复查一两次，或生活变化时复查。别被新闻带着走。"
+      }
+     ],
+     "checklist": [
+      "承受力已评估，非凭感觉",
+      "已按类别写下比例",
+      "再平衡规则已提前定好",
+      "流动性与锁定期已弄清",
+      "已核实监管牌照"
+     ],
+     "illustration": {
+      "label": "仅为示意，不构成建议：适用于较长期资金",
+      "rows": [
+       {
+        "name": "现金 / 存款",
+        "pct": 25
+       },
+       {
+        "name": "债券",
+        "pct": 30
+       },
+       {
+        "name": "分散型股票基金",
+        "pct": 40
+       },
+       {
+        "name": "其他",
+        "pct": 5
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "l4",
+   "order": 4,
+   "icon": "crown",
+   "en": {
+    "title": "Professional",
+    "subtitle": "Think in portfolios"
+   },
+   "zh": {
+    "title": "专业思维",
+    "subtitle": "用组合的眼光看"
+   },
+   "lessons": [
+    {
+     "id": "l4-1",
+     "xp": 25,
+     "minutes": 5,
+     "icon": "layers",
+     "en": {
+      "title": "Portfolio and correlation",
+      "cards": [
+       {
+        "h": "See the whole",
+        "p": "Judge the whole mix, not each piece alone. A piece can look risky yet help the total."
+       },
+       {
+        "h": "Correlation",
+        "p": "Correlation shows how much two things move together. High: they move together. Low: they move differently."
+       },
+       {
+        "h": "A caution",
+        "p": "Low-correlation pieces can smooth the ride. But in a crisis, correlations can rise. Do not rely on them blindly."
+       },
+       {
+        "h": "Give roles",
+        "p": "Give each part a job: safety, growth, flexibility. Fewer, clearer parts beat a pile you cannot explain."
+       }
+      ]
+     },
+     "zh": {
+      "title": "组合与相关性",
+      "cards": [
+       {
+        "h": "看整体",
+        "p": "要评判整个组合，而不是单个产品。某项看起来风险高，也可能对整体有帮助。"
+       },
+       {
+        "h": "相关性",
+        "p": "相关性表示两样东西同步变化的程度。高：同涨同跌。低：走势各异。"
+       },
+       {
+        "h": "要小心",
+        "p": "低相关的部分可以让波动更平稳。但危机时相关性可能上升，别盲目依赖。"
+       },
+       {
+        "h": "分配角色",
+        "p": "给每部分一个任务：安全、增长、灵活。少而清晰，胜过一堆讲不清的。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "Two assets move together strongly. Their correlation is...",
+        "zh": "两种资产同步性很强。它们的相关性是……"
+       },
+       "options": [
+        {
+         "en": "High",
+         "zh": "高"
+        },
+        {
+         "en": "Low",
+         "zh": "低"
+        },
+        {
+         "en": "Always zero",
+         "zh": "始终为零"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "High correlation means they tend to rise and fall together.",
+        "zh": "高相关意味着它们倾向同涨同跌。"
+       }
+      },
+      {
+       "q": {
+        "en": "In market stress, correlations can...",
+        "zh": "市场承压时，相关性可能……"
+       },
+       "options": [
+        {
+         "en": "Vanish, so risk disappears",
+         "zh": "消失，风险也随之消失"
+        },
+        {
+         "en": "Rise, so diversification helps less than expected",
+         "zh": "上升，分散的效果不及预期"
+        },
+        {
+         "en": "Never change",
+         "zh": "永远不变"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Many things can fall together in a crisis.",
+        "zh": "危机中，许多东西可能一起下跌。"
+       }
+      },
+      {
+       "q": {
+        "en": "What does a roles approach mean?",
+        "zh": "“角色法”是什么意思？"
+       },
+       "options": [
+        {
+         "en": "Hold as many items as possible",
+         "zh": "尽可能多持有"
+        },
+        {
+         "en": "Each holding has a clear purpose in the plan",
+         "zh": "每项持有在计划中都有明确用途"
+        },
+        {
+         "en": "Copy someone else's list",
+         "zh": "照抄别人的清单"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "A clear purpose makes the mix easy to review.",
+        "zh": "用途清晰，组合才便于复查。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l4-2",
+     "xp": 25,
+     "minutes": 5,
+     "icon": "gauge",
+     "en": {
+      "title": "Drawdown and position size",
+      "cards": [
+       {
+        "h": "Drawdown",
+        "p": "Drawdown is the fall from a peak to a low. Illustration: ¥10,000 falling to ¥7,000 is a 30% drawdown."
+       },
+       {
+        "h": "Recovery maths",
+        "p": "After a 50% fall you need a 100% gain to get back. Losses hurt more than they look."
+       },
+       {
+        "h": "Position size",
+        "p": "Position size is how much of your total sits in one item. Illustration: ¥1,000 in a ¥20,000 portfolio is 5%."
+       },
+       {
+        "h": "Size to survive",
+        "p": "Choose sizes so a bad outcome on one item is one you can accept. Set limits before you buy, not after."
+       }
+      ]
+     },
+     "zh": {
+      "title": "回撤与仓位",
+      "cards": [
+       {
+        "h": "回撤",
+        "p": "回撤是从高点跌到低点的幅度。示意：¥10,000 跌到 ¥7,000，回撤 30%。"
+       },
+       {
+        "h": "回本的算术",
+        "p": "跌 50% 后，要涨 100% 才能回本。亏损比看上去更伤。"
+       },
+       {
+        "h": "仓位",
+        "p": "仓位是单个项目占总资产的比例。示意：¥20,000 组合里放 ¥1,000，占 5%。"
+       },
+       {
+        "h": "以能承受为准",
+        "p": "仓位要定到：这一项出大问题，你也承受得起。限额要在买之前定，不是之后。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "What is a drawdown?",
+        "zh": "什么是回撤？"
+       },
+       "options": [
+        {
+         "en": "A fee for withdrawing money",
+         "zh": "取款手续费"
+        },
+        {
+         "en": "A guaranteed floor on value",
+         "zh": "价值的保底线"
+        },
+        {
+         "en": "The fall from a peak to a later low",
+         "zh": "从高点到之后低点的跌幅"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "It measures how far value dropped from its high.",
+        "zh": "它衡量价值从高点跌了多少。"
+       }
+      },
+      {
+       "q": {
+        "en": "After a 50% fall, what gain is needed to get back to the start?",
+        "zh": "跌 50% 后，要涨多少才能回到起点？"
+       },
+       "options": [
+        {
+         "en": "100%",
+         "zh": "100%"
+        },
+        {
+         "en": "50%",
+         "zh": "50%"
+        },
+        {
+         "en": "25%",
+         "zh": "25%"
+        }
+       ],
+       "answer": 0,
+       "why": {
+        "en": "¥100 falls to ¥50. To reach ¥100 again, ¥50 must double.",
+        "zh": "¥100 跌到 ¥50。要回到 ¥100，¥50 得翻倍。"
+       }
+      },
+      {
+       "q": {
+        "en": "Illustration: ¥2,000 in a ¥20,000 portfolio is what share?",
+        "zh": "示意：¥20,000 组合里的 ¥2,000 占多少？"
+       },
+       "options": [
+        {
+         "en": "2%",
+         "zh": "2%"
+        },
+        {
+         "en": "20%",
+         "zh": "20%"
+        },
+        {
+         "en": "10%",
+         "zh": "10%"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "2,000 ÷ 20,000 = 10%.",
+        "zh": "2,000 ÷ 20,000 = 10%。"
+       }
+      }
+     ]
+    },
+    {
+     "id": "l4-3",
+     "xp": 25,
+     "minutes": 6,
+     "icon": "users",
+     "en": {
+      "title": "Biases and due diligence",
+      "cards": [
+       {
+        "h": "Common traps",
+        "p": "Herd following. Holding losers and selling winners too early. Overconfidence. Chasing last year's winners."
+       },
+       {
+        "h": "Rules help",
+        "p": "Write the plan first. Pause 24 hours before big moves. Decide limits in advance."
+       },
+       {
+        "h": "Due diligence",
+        "p": "Who is the provider, and is it licensed by the relevant regulator? What are all fees? Where does the return come from? Can I withdraw?"
+       },
+       {
+        "h": "Red flags",
+        "p": "Guaranteed returns, pressure to hurry, secrecy, recruit-a-friend schemes. Ask how the seller is paid. Licensed advisers exist."
+       }
+      ]
+     },
+     "zh": {
+      "title": "行为偏差与尽职调查",
+      "cards": [
+       {
+        "h": "常见陷阱",
+        "p": "跟风从众。亏的拿着、赚的早卖。过度自信。追逐去年的赢家。"
+       },
+       {
+        "h": "用规则对抗",
+        "p": "先写计划。大动作前冷静 24 小时。限额提前定好。"
+       },
+       {
+        "h": "尽职调查",
+        "p": "机构是谁，是否获相关监管部门许可？所有费用是多少？收益从哪来？我能取出吗？"
+       },
+       {
+        "h": "危险信号",
+        "p": "保本保收益、催你赶紧、讳莫如深、拉人头。问问销售怎么拿报酬。持牌顾问可提供帮助。"
+       }
+      ]
+     },
+     "quiz": [
+      {
+       "q": {
+        "en": "What does herd behaviour mean?",
+        "zh": "什么是羊群效应？"
+       },
+       "options": [
+        {
+         "en": "Diversifying across many assets",
+         "zh": "分散到多种资产"
+        },
+        {
+         "en": "Rebalancing on a schedule",
+         "zh": "按计划再平衡"
+        },
+        {
+         "en": "Following the crowd without your own analysis",
+         "zh": "不做自己的分析，只跟着人群走"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "Popularity is not evidence that something fits you.",
+        "zh": "热门不等于适合你。"
+       }
+      },
+      {
+       "q": {
+        "en": "Which is a clear red flag?",
+        "zh": "哪项是明显的危险信号？"
+       },
+       "options": [
+        {
+         "en": "A written fee list",
+         "zh": "书面列明的费用清单"
+        },
+        {
+         "en": "A licence you can verify",
+         "zh": "可以核实的牌照"
+        },
+        {
+         "en": "Guaranteed returns plus pressure to decide today",
+         "zh": "保证收益，还催你今天就决定"
+        }
+       ],
+       "answer": 2,
+       "why": {
+        "en": "Guarantees and urgency are classic warning signs.",
+        "zh": "保证和催促，是典型的警示信号。"
+       }
+      },
+      {
+       "q": {
+        "en": "Why ask how a seller is paid?",
+        "zh": "为什么要问销售怎么拿报酬？"
+       },
+       "options": [
+        {
+         "en": "It sets the product's return",
+         "zh": "它决定产品的收益"
+        },
+        {
+         "en": "Commissions can conflict with your interests",
+         "zh": "佣金可能与你的利益冲突"
+        },
+        {
+         "en": "Sellers are never paid",
+         "zh": "销售从不拿报酬"
+        }
+       ],
+       "answer": 1,
+       "why": {
+        "en": "Pay can push a seller toward products that suit them, not you.",
+        "zh": "报酬可能把销售推向对自己有利而非对你有利的产品。"
+       }
+      }
+     ]
+    }
+   ],
+   "playbook": {
+    "en": {
+     "title": "Professional playbook",
+     "intro": "How people often think at portfolio level: budget risk, set rules, stress-test, document. Educational only, not personal investment advice.",
+     "steps": [
+      {
+       "h": "Budget risk",
+       "p": "Decide the largest total fall you can accept, then size positions to fit it."
+      },
+      {
+       "h": "Check what moves together",
+       "p": "List which holdings share the same drivers. Assume links can tighten in a crisis."
+      },
+      {
+       "h": "Fix rebalancing rules",
+       "p": "Choose bands or dates, and who acts. Count fees and taxes."
+      },
+      {
+       "h": "Stress-test in thought",
+       "p": "Ask: if everything fell 30% at once, would my plan and my nerves hold?"
+      },
+      {
+       "h": "Document and get advice",
+       "p": "Keep a decision log. For large or complex cases, consult a licensed adviser."
+      }
+     ],
+     "checklist": [
+      "Maximum acceptable fall written down",
+      "Position limits set before buying",
+      "Correlation under stress considered",
+      "Decision log kept",
+      "Conflicts of interest asked about"
+     ],
+     "illustration": {
+      "label": "Illustration only, not a recommendation: long horizons, with broader categories",
+      "rows": [
+       {
+        "name": "Cash / deposits",
+        "pct": 15
+       },
+       {
+        "name": "Bonds",
+        "pct": 30
+       },
+       {
+        "name": "Diversified equity funds",
+        "pct": 45
+       },
+       {
+        "name": "Other",
+        "pct": 10
+       }
+      ]
+     }
+    },
+    "zh": {
+     "title": "专业手册",
+     "intro": "常见的组合层面思路：分配风险、设规则、做压力测试、留记录。仅为教育，不是个人投资建议。",
+     "steps": [
+      {
+       "h": "分配风险预算",
+       "p": "先定能接受的最大总跌幅，再据此定各项仓位。"
+      },
+      {
+       "h": "查同步性",
+       "p": "列出哪些持有受同样因素驱动。假设危机时关联会变紧。"
+      },
+      {
+       "h": "固定再平衡规则",
+       "p": "定好偏离幅度或日期，以及谁来执行。算上费用和税。"
+      },
+      {
+       "h": "做思想压力测试",
+       "p": "问：如果全部同时跌 30%，我的计划和心态还撑得住吗？"
+      },
+      {
+       "h": "留记录，必要时找顾问",
+       "p": "写决策日志。金额大或情况复杂时，请咨询持牌顾问。"
+      }
+     ],
+     "checklist": [
+      "已写下可接受的最大跌幅",
+      "买入前已设仓位上限",
+      "已考虑承压时的相关性",
+      "有决策日志",
+      "已问清利益冲突"
+     ],
+     "illustration": {
+      "label": "仅为示意，不构成建议：长期资金，类别更广",
+      "rows": [
+       {
+        "name": "现金 / 存款",
+        "pct": 15
+       },
+       {
+        "name": "债券",
+        "pct": 30
+       },
+       {
+        "name": "分散型股票基金",
+        "pct": 45
+       },
+       {
+        "name": "其他",
+        "pct": 10
+       }
+      ]
+     }
+    }
+   }
+  }
+ ]
+}
